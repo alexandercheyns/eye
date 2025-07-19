@@ -1,7 +1,8 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Eye</title>
   <title>Simple Cartoon Eye</title>
   <style>
     html, body {
@@ -14,42 +15,25 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      background: #000;
     }
     #eye {
       position: absolute;
       width: 600px;
       height: 600px;
-      aspect-ratio: 1 / 1;
-      border-radius: 50%;
-      background: #fff;
-      overflow: visible;
-      will-change: left, top;
-    }
-    #iris {
-      position: absolute;
-      width: 100%;
-      height: 100%;
       background: #fff;
       border-radius: 50%;
-      top: 0;
-      left: 0;
       overflow: hidden;
       transition: left 3s ease-in-out, top 3s ease-in-out;
     }
     #pupil {
       position: absolute;
-      width: 350px;
-      height: 350px;
       width: 300px;
       height: 300px;
       background: #000;
       border-radius: 50%;
       top: 50%;
-      left: 40%;
       left: 50%;
       transform: translate(-50%, -50%);
-      transition: transform 1s ease-out, left 1s ease-out, top 1s ease-out;
       transition: left 3s ease-in-out, top 3s ease-in-out;
     }
     #pupil::before {
@@ -66,44 +50,8 @@
       position: absolute;
       width: 100%;
       height: 100%;
-      background: #000;
       background: #111;
       z-index: 2;
-    }
-    #upperEyelid {
-      top: -100%;
-      border-radius: 50% 50% 0 0;
-    }
-    #lowerEyelid {
-      bottom: -100%;
-      top: auto;
-      border-radius: 0 0 50% 50%;
-    }
-    @keyframes blinkUpper {
-      0%, 100% { top: -100%; }
-      50% { top: 0; }
-    }
-    @keyframes blinkLower {
-      0%, 100% { bottom: -100%; }
-      50% { bottom: 0; }
-    }
-    .blinkUpper {
-      animation: blinkUpper 0.8s ease-in-out;
-    }
-    .blinkLower {
-      animation: blinkLower 0.8s ease-in-out;
-    }
-    #eyebrow {
-      position: absolute;
-      width: 600px;
-      height: 80px;
-      background: #8B4513; /* brown eyebrow */
-      border-radius: 40px;
-      top: -60px;
-      left: 50%;
-      transform: translateX(-50%) rotate(0deg);
-      z-index: 3;
-      transition: transform 0.8s ease-in-out;
     }
     #upperEyelid { top: -100%; transition: top 0.8s ease-in-out; }
     #lowerEyelid { bottom: -100%; transition: bottom 0.8s ease-in-out; }
@@ -115,49 +63,17 @@
 </head>
 <body>
   <div id="eye">
-    <div id="iris"></div>
     <div id="pupil"></div>
     <div id="upperEyelid" class="eyelid"></div>
     <div id="lowerEyelid" class="eyelid"></div>
-    <div id="eyebrow"></div>
   </div>
   <script>
-    const eye = document.getElementById('eye');
-    const pupil = document.getElementById('pupil');
-    const upperEyelid = document.getElementById('upperEyelid');
-    const lowerEyelid = document.getElementById('lowerEyelid');
-    const eyebrow = document.getElementById('eyebrow');
-    let isMoving = false;
     (function() {
       const eye = document.getElementById('eye');
       const pupil = document.getElementById('pupil');
       const upper = document.getElementById('upperEyelid');
       const lower = document.getElementById('lowerEyelid');
 
-    // Eyebrow angle changes only
-    const eyebrowAngles = [-20, -10, 0, 10, 20];
-    let browIdx = 0;
-    function changeBrowAngle() {
-      browIdx = (browIdx + 1) % eyebrowAngles.length;
-      eyebrow.style.transform = `translateX(-50%) rotate(${eyebrowAngles[browIdx]}deg)`;
-      setTimeout(changeBrowAngle, 4000 + Math.random() * 2000);
-    }
-
-    function blink() {
-      upperEyelid.classList.add('blinkUpper');
-      lowerEyelid.classList.add('blinkLower');
-      setTimeout(() => {
-        upperEyelid.classList.remove('blinkUpper');
-        lowerEyelid.classList.remove('blinkLower');
-      }, 800);
-    }
-
-    function lookAround() {
-      if (!isMoving) {
-        const x = 30 + Math.random() * 40;
-        const y = 40 + Math.random() * 30;
-        pupil.style.left = `${x}%`;
-        pupil.style.top = `${y}%`;
       function blink() {
         upper.classList.add('blinkUp');
         lower.classList.add('blinkDown');
@@ -166,21 +82,7 @@
           lower.classList.remove('blinkDown');
         }, 1000);
       }
-      setTimeout(lookAround, 2000 + Math.random() * 2000);
-    }
 
-    function lookAroundEye() {
-      const maxX = window.innerWidth - eye.offsetWidth;
-      const maxY = window.innerHeight - eye.offsetHeight;
-      const targetX = Math.random() * maxX;
-      const targetY = Math.random() * maxY;
-      isMoving = true;
-      eye.style.transition = 'left 1.5s ease-out, top 1.5s ease-out';
-      eye.style.left = `${targetX}px`;
-      eye.style.top = `${targetY}px`;
-      setTimeout(() => { isMoving = false; }, 1500);
-      setTimeout(lookAroundEye, 3000 + Math.random() * 2000);
-    }
       function moveEye() {
         const rect = eye.getBoundingClientRect();
         const maxX = window.innerWidth - rect.width;
@@ -202,11 +104,6 @@
         setTimeout(moveEye, 3000 + Math.random() * 7000);
       }
 
-    // Initialize loops
-    blink(); setInterval(blink, 4000);
-    changeBrowAngle();
-    lookAround();
-    lookAroundEye();
       blink(); setInterval(blink, 5000);
       moveEye();
       // Refresh page every hour
