@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Cartoon Eye</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple Cartoon Eye with Occluder</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
       background: #111;
       display: flex;
       align-items: center;
@@ -18,8 +16,7 @@
     }
     #eye {
       position: absolute;
-      width: 600px;
-      height: 600px;
+      width: 600px; height: 600px;
       background: #fff;
       border-radius: 50%;
       overflow: hidden;
@@ -27,29 +24,24 @@
     }
     #pupil {
       position: absolute;
-      width: 300px;
-      height: 300px;
+      width: 300px; height: 300px;
       background: #000;
       border-radius: 50%;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       transition: left 3s ease-in-out, top 3s ease-in-out;
     }
     #pupil::before {
       content: '';
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 80px; height: 80px;
       background: #fff;
       border-radius: 50%;
-      top: 40px;
-      left: 40px;
+      top: 40px; left: 40px;
     }
     .eyelid {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       background: #111;
       z-index: 2;
     }
@@ -59,11 +51,26 @@
     @keyframes blinkDown { 0%,100% { bottom: -100%; } 50% { bottom: 0; } }
     .blinkUp { animation: blinkUp 1s ease-in-out; }
     .blinkDown { animation: blinkDown 1s ease-in-out; }
+
+    /* NEW: the black occluder sphere */
+    #occluder {
+      position: absolute;
+      width: 300px; height: 300px;
+      background: #000;
+      border-radius: 50%;
+      bottom: -150px;   /* start hidden just below */
+      left: 50%;        /* center horizontally */
+      transform: translateX(-50%);
+      transition: bottom 1s ease-in-out;
+      z-index: 1;       /* behind eyelids, above eyeball */
+    }
   </style>
 </head>
 <body>
   <div id="eye">
     <div id="pupil"></div>
+    <!-- black occluder -->
+    <div id="occluder"></div>
     <div id="upperEyelid" class="eyelid"></div>
     <div id="lowerEyelid" class="eyelid"></div>
   </div>
@@ -73,6 +80,7 @@
       const pupil = document.getElementById('pupil');
       const upper = document.getElementById('upperEyelid');
       const lower = document.getElementById('lowerEyelid');
+      const occluder = document.getElementById('occluder');
 
       function blink() {
         upper.classList.add('blinkUp');
@@ -92,24 +100,36 @@
         // Move eye container
         eye.style.left = targetX + 'px';
         eye.style.top = targetY + 'px';
-        // Pupil follows direction during slide only
+        // Pupil follows during slide
         pupil.style.left = targetX > rect.left ? '80%' : '20%';
-        pupil.style.top = targetY > rect.top ? '80%' : '20%';
+        pupil.style.top  = targetY > rect.top  ? '80%' : '20%';
         // Reset pupil after slide
         setTimeout(() => {
           pupil.style.left = '50%';
-          pupil.style.top = '50%';
+          pupil.style.top  = '50%';
         }, 3000);
-        // Schedule next move after 3–10s pause
+        // Next move in 3–10s
         setTimeout(moveEye, 3000 + Math.random() * 7000);
+      }
+
+      // NEW: show occluder
+      function showOccluder() {
+        // slide up
+        occluder.style.bottom = '0px';
+        // slide back down after 1s
+        setTimeout(() => {
+          occluder.style.bottom = '-150px';
+        }, 1000);
+        // schedule next occlusion 5–15s later
+        setTimeout(showOccluder, 5000 + Math.random() * 10000);
       }
 
       blink(); setInterval(blink, 5000);
       moveEye();
+      showOccluder();              // kick off occluder cycle
       // Refresh page every hour
       setInterval(() => location.reload(), 60 * 60 * 1000);
     })();
   </script>
 </body>
 </html>
-
