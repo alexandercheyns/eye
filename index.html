@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Simple Cartoon Eye</title>
   <style>
     html, body {
@@ -68,11 +68,12 @@
     <div id="lowerEyelid" class="eyelid"></div>
   </div>
   <script>
-    (function() {
+    (function () {
       const eye = document.getElementById('eye');
       const pupil = document.getElementById('pupil');
       const upper = document.getElementById('upperEyelid');
       const lower = document.getElementById('lowerEyelid');
+      const channel = new BroadcastChannel('eye-sync');
 
       function blink() {
         upper.classList.add('blinkUp');
@@ -83,32 +84,55 @@
         }, 1000);
       }
 
-      function moveEye() {
+      function moveEyeTo(x, y) {
+        eye.style.left = x + 'px';
+        eye.style.top = y + 'px';
+        const rect = eye.getBoundingClientRect();
+        pupil.style.left = x > rect.left ? '80%' : '20%';
+        pupil.style.top = y > rect.top ? '80%' : '20%';
+        setTimeout(() => {
+          pupil.style.left = '50%';
+          pupil.style.top = '50%';
+        }, 3000);
+      }
+
+      function randomMove() {
         const rect = eye.getBoundingClientRect();
         const maxX = window.innerWidth - rect.width;
         const maxY = window.innerHeight - rect.height;
         const targetX = Math.random() * maxX;
         const targetY = Math.random() * maxY;
-        // Move eye container
-        eye.style.left = targetX + 'px';
-        eye.style.top = targetY + 'px';
-        // Pupil follows direction during slide only
-        pupil.style.left = targetX > rect.left ? '80%' : '20%';
-        pupil.style.top = targetY > rect.top ? '80%' : '20%';
-        // Reset pupil after slide
-        setTimeout(() => {
-          pupil.style.left = '50%';
-          pupil.style.top = '50%';
-        }, 3000);
-        // Schedule next move after 3–10s pause
-        setTimeout(moveEye, 3000 + Math.random() * 7000);
+        moveEyeTo(targetX, targetY);
+        channel.postMessage({ x: targetX, y: targetY });
+        scheduleNextMove();
       }
 
-      blink(); setInterval(blink, 5000);
-      moveEye();
+      function scheduleNextMove() {
+        const delay = 3000 + Math.random() * 7000;
+        setTimeout(() => {
+          if (document.visibilityState === 'visible') {
+            randomMove();
+          }
+        }, delay);
+      }
+
+      // Listen for movements from other tabs
+      channel.addEventListener('message', (event) => {
+        const { x, y } = event.data;
+        moveEyeTo(x, y);
+      });
+
+      blink();
+      setInterval(blink, 5000);
+
+      if (document.visibilityState === 'visible') {
+        randomMove();
+      }
+
       // Refresh page every hour
       setInterval(() => location.reload(), 60 * 60 * 1000);
     })();
   </script>
 </body>
 </html>
+
