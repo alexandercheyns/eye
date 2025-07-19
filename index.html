@@ -1,25 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple Cartoon Eye</title>
+  <meta charset="UTF-8">
+  <title>Synced Cartoon Eye</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
+      margin: 0; padding: 0; width: 100%; height: 100%;
       background: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       overflow: hidden;
     }
     #eye {
       position: absolute;
-      width: 600px;
-      height: 600px;
+      width: 600px; height: 600px;
       background: #fff;
       border-radius: 50%;
       overflow: hidden;
@@ -27,29 +20,24 @@
     }
     #pupil {
       position: absolute;
-      width: 300px;
-      height: 300px;
+      width: 300px; height: 300px;
       background: #000;
       border-radius: 50%;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       transition: left 3s ease-in-out, top 3s ease-in-out;
     }
     #pupil::before {
       content: '';
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 80px; height: 80px;
       background: #fff;
       border-radius: 50%;
-      top: 40px;
-      left: 40px;
+      top: 40px; left: 40px;
     }
     .eyelid {
       position: absolute;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       background: #111;
       z-index: 2;
     }
@@ -67,72 +55,62 @@
     <div id="upperEyelid" class="eyelid"></div>
     <div id="lowerEyelid" class="eyelid"></div>
   </div>
+
   <script>
-    (function () {
-      const eye = document.getElementById('eye');
-      const pupil = document.getElementById('pupil');
-      const upper = document.getElementById('upperEyelid');
-      const lower = document.getElementById('lowerEyelid');
-      const channel = new BroadcastChannel('eye-sync');
+    const eye = document.getElementById('eye');
+    const pupil = document.getElementById('pupil');
+    const upper = document.getElementById('upperEyelid');
+    const lower = document.getElementById('lowerEyelid');
 
-      function blink() {
-        upper.classList.add('blinkUp');
-        lower.classList.add('blinkDown');
-        setTimeout(() => {
-          upper.classList.remove('blinkUp');
-          lower.classList.remove('blinkDown');
-        }, 1000);
-      }
+    // 👉 Replace with your server's local IP
+    const socket = new WebSocket("ws://192.168.1.21");
 
-      function moveEyeTo(x, y) {
-        eye.style.left = x + 'px';
-        eye.style.top = y + 'px';
-        const rect = eye.getBoundingClientRect();
-        pupil.style.left = x > rect.left ? '80%' : '20%';
-        pupil.style.top = y > rect.top ? '80%' : '20%';
-        setTimeout(() => {
-          pupil.style.left = '50%';
-          pupil.style.top = '50%';
-        }, 3000);
-      }
+    function blink() {
+      upper.classList.add('blinkUp');
+      lower.classList.add('blinkDown');
+      setTimeout(() => {
+        upper.classList.remove('blinkUp');
+        lower.classList.remove('blinkDown');
+      }, 1000);
+    }
 
-      function randomMove() {
-        const rect = eye.getBoundingClientRect();
-        const maxX = window.innerWidth - rect.width;
-        const maxY = window.innerHeight - rect.height;
-        const targetX = Math.random() * maxX;
-        const targetY = Math.random() * maxY;
-        moveEyeTo(targetX, targetY);
-        channel.postMessage({ x: targetX, y: targetY });
-        scheduleNextMove();
-      }
+    function moveEyeTo(x, y) {
+      eye.style.left = x + 'px';
+      eye.style.top = y + 'px';
+      const rect = eye.getBoundingClientRect();
+      pupil.style.left = x > rect.left ? '80%' : '20%';
+      pupil.style.top = y > rect.top ? '80%' : '20%';
+      setTimeout(() => {
+        pupil.style.left = '50%';
+        pupil.style.top = '50%';
+      }, 3000);
+    }
 
-      function scheduleNextMove() {
-        const delay = 3000 + Math.random() * 7000;
-        setTimeout(() => {
-          if (document.visibilityState === 'visible') {
-            randomMove();
-          }
-        }, delay);
-      }
+    function randomMove() {
+      const rect = eye.getBoundingClientRect();
+      const maxX = window.innerWidth - rect.width;
+      const maxY = window.innerHeight - rect.height;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      moveEyeTo(x, y);
+      socket.send(JSON.stringify({ x, y }));
+      setTimeout(randomMove, 3000 + Math.random() * 7000);
+    }
 
-      // Listen for movements from other tabs
-      channel.addEventListener('message', (event) => {
-        const { x, y } = event.data;
-        moveEyeTo(x, y);
-      });
-
-      blink();
-      setInterval(blink, 5000);
-
+    socket.addEventListener('open', () => {
       if (document.visibilityState === 'visible') {
         randomMove();
       }
+    });
 
-      // Refresh page every hour
-      setInterval(() => location.reload(), 60 * 60 * 1000);
-    })();
+    socket.addEventListener('message', (event) => {
+      const { x, y } = JSON.parse(event.data);
+      moveEyeTo(x, y);
+    });
+
+    blink();
+    setInterval(blink, 5000);
+    setInterval(() => location.reload(), 60 * 60 * 1000);
   </script>
 </body>
 </html>
-
