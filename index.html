@@ -1,64 +1,48 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple Cartoon Eye</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="3600"> <!-- refresh every 3600 seconds (1 hour) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time‑Synced Kawaii Eye (Auto‑Refresh Hourly)</title>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      margin:0; padding:0;
+      width:100%; height:100%;
+      background:#111;
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
     }
     #eye {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      background: #fff;
-      border-radius: 50%;
-      overflow: hidden;
-      transition: left 3s ease-in-out, top 3s ease-in-out;
+      position:absolute;
+      width:600px; height:600px;
+      background:#fff; border-radius:50%; overflow:hidden;
+      transition:left 3s ease-in-out, top 3s ease-in-out;
     }
     #pupil {
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: #000;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      transition: left 3s ease-in-out, top 3s ease-in-out;
+      position:absolute;
+      width:300px; height:300px;
+      background:#000; border-radius:50%;
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      transition:left 3s ease-in-out, top 3s ease-in-out;
     }
     #pupil::before {
-      content: '';
-      position: absolute;
-      width: 80px;
-      height: 80px;
-      background: #fff;
-      border-radius: 50%;
-      top: 40px;
-      left: 40px;
+      content:''; position:absolute;
+      width:80px; height:80px;
+      background:#fff; border-radius:50%;
+      top:40px; left:40px;
     }
     .eyelid {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: #111;
-      z-index: 2;
+      position:absolute; width:100%; height:100%;
+      background:#111; z-index:2;
+      transition:top 0.8s ease-in-out, bottom 0.8s ease-in-out;
     }
-    #upperEyelid { top: -100%; transition: top 0.8s ease-in-out; }
-    #lowerEyelid { bottom: -100%; transition: bottom 0.8s ease-in-out; }
-    @keyframes blinkUp { 0%,100% { top: -100%; } 50% { top: 0; } }
-    @keyframes blinkDown { 0%,100% { bottom: -100%; } 50% { bottom: 0; } }
-    .blinkUp { animation: blinkUp 1s ease-in-out; }
-    .blinkDown { animation: blinkDown 1s ease-in-out; }
+    #upperEyelid { top:-100%; }
+    #lowerEyelid { bottom:-100%; }
+    @keyframes blinkUp { 0%,100% { top:-100%; } 50% { top:0; } }
+    @keyframes blinkDown { 0%,100% { bottom:-100%; } 50% { bottom:0; } }
+    .blinkUp { animation:blinkUp 1s ease-in-out; }
+    .blinkDown { animation:blinkDown 1s ease-in-out; }
   </style>
 </head>
 <body>
@@ -68,69 +52,50 @@
     <div id="lowerEyelid" class="eyelid"></div>
   </div>
   <script>
-    (function () {
+    (function(){
+      const positions = [
+        {x:0.1,y:0.1},{x:0.8,y:0.2},{x:0.7,y:0.6},
+        {x:0.3,y:0.8},{x:0.5,y:0.5}
+      ];
+      const STEP = 8000;
+      const CYCLE = positions.length * STEP;
       const eye = document.getElementById('eye');
       const pupil = document.getElementById('pupil');
       const upper = document.getElementById('upperEyelid');
       const lower = document.getElementById('lowerEyelid');
-      const channel = new BroadcastChannel('eye-sync');
 
-      function blink() {
+      function blink(){
         upper.classList.add('blinkUp');
         lower.classList.add('blinkDown');
-        setTimeout(() => {
+        setTimeout(()=>{
           upper.classList.remove('blinkUp');
           lower.classList.remove('blinkDown');
-        }, 1000);
+        },1000);
       }
-
-      function moveEyeTo(x, y) {
-        eye.style.left = x + 'px';
-        eye.style.top = y + 'px';
+      function moveTo(p){
         const rect = eye.getBoundingClientRect();
-        pupil.style.left = x > rect.left ? '80%' : '20%';
-        pupil.style.top = y > rect.top ? '80%' : '20%';
-        setTimeout(() => {
+        const tx = p.x * (window.innerWidth - rect.width);
+        const ty = p.y * (window.innerHeight - rect.height);
+        eye.style.left = tx + 'px';
+        eye.style.top  = ty + 'px';
+        pupil.style.left = p.x > 0.5 ? '80%' : '20%';
+        pupil.style.top  = p.y > 0.5 ? '80%' : '20%';
+        setTimeout(()=>{
           pupil.style.left = '50%';
-          pupil.style.top = '50%';
-        }, 3000);
+          pupil.style.top  = '50%';
+        },3000);
       }
-
-      function randomMove() {
-        const rect = eye.getBoundingClientRect();
-        const maxX = window.innerWidth - rect.width;
-        const maxY = window.innerHeight - rect.height;
-        const targetX = Math.random() * maxX;
-        const targetY = Math.random() * maxY;
-        moveEyeTo(targetX, targetY);
-        channel.postMessage({ x: targetX, y: targetY });
-        scheduleNextMove();
+      function tick(){
+        const now = Date.now() % CYCLE;
+        const idx = Math.floor(now / STEP);
+        moveTo(positions[idx]);
+        blink();
+        const until = STEP - (now % STEP);
+        setTimeout(tick, until);
       }
-
-      function scheduleNextMove() {
-        const delay = 3000 + Math.random() * 7000;
-        setTimeout(() => {
-          if (document.visibilityState === 'visible') {
-            randomMove();
-          }
-        }, delay);
-      }
-
-      // Listen for movements from other tabs
-      channel.addEventListener('message', (event) => {
-        const { x, y } = event.data;
-        moveEyeTo(x, y);
-      });
-
-      blink();
-      setInterval(blink, 5000);
-
-      if (document.visibilityState === 'visible') {
-        randomMove();
-      }
-
-      // Refresh page every hour
-      setInterval(() => location.reload(), 60 * 60 * 1000);
+      tick();
+      // fallback JS refresh every hour
+      setInterval(()=> location.reload(), 3600 * 1000);
     })();
   </script>
 </body>
