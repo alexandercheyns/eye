@@ -1,101 +1,225 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="3600"> <!-- refresh every 3600 seconds (1 hour) -->
+  <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Time‑Synced Kawaii Eye (Auto‑Refresh Hourly)</title>
+  <title>Sleepy Eye with Bubbles</title>
   <style>
     html, body {
-      margin:0; padding:0;
-      width:100%; height:100%;
-      background:#111;
-      display:flex; align-items:center; justify-content:center;
-      overflow:hidden;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
     }
+
+    #eyeContainer {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      z-index: 1;
+    }
+
     #eye {
-      position:absolute;
-      width:600px; height:600px;
-      background:#fff; border-radius:50%; overflow:hidden;
-      transition:left 3s ease-in-out, top 3s ease-in-out;
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: #fff;
+      border-radius: 50%;
+      overflow: hidden;
+      transition: left 3s ease-in-out, top 3s ease-in-out;
+      z-index: 1;
     }
+
     #pupil {
-      position:absolute;
-      width:300px; height:300px;
-      background:#000; border-radius:50%;
-      top:50%; left:50%; transform:translate(-50%,-50%);
-      transition:left 3s ease-in-out, top 3s ease-in-out;
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: #000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 3s ease-in-out, top 3s ease-in-out;
     }
+
     #pupil::before {
-      content:''; position:absolute;
-      width:80px; height:80px;
-      background:#fff; border-radius:50%;
-      top:40px; left:40px;
+      content: '';
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: #fff;
+      border-radius: 50%;
+      top: 40px;
+      left: 40px;
     }
+
     .eyelid {
-      position:absolute; width:100%; height:100%;
-      background:#111; z-index:2;
-      transition:top 0.8s ease-in-out, bottom 0.8s ease-in-out;
+      position: absolute;
+      width: 600px;
+      height: 100px;
+      background: #555;
+      border-radius: 50px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      display: none;
     }
-    #upperEyelid { top:-100%; }
-    #lowerEyelid { bottom:-100%; }
-    @keyframes blinkUp { 0%,100% { top:-100%; } 50% { top:0; } }
-    @keyframes blinkDown { 0%,100% { bottom:-100%; } 50% { bottom:0; } }
-    .blinkUp { animation:blinkUp 1s ease-in-out; }
-    .blinkDown { animation:blinkDown 1s ease-in-out; }
+
+    .sleepLid {
+      display: block;
+      animation: floatSleep 4s ease-in-out infinite;
+    }
+
+    @keyframes floatSleep {
+      0%, 100% {
+        transform: translate(-50%, -35%);
+      }
+      50% {
+        transform: translate(-50%, -65%);
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Sleepy Bubbles */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      animation: bubbleUp 5s linear infinite;
+      display: none;
+      z-index: 3;
+    }
+
+    .showBubbles .bubble {
+      display: block;
+    }
+
+    #bubble1 {
+      width: 40px;
+      height: 40px;
+      left: 85%;
+      top: 10%;
+      animation-delay: 0s;
+    }
+
+    #bubble2 {
+      width: 30px;
+      height: 30px;
+      left: 88%;
+      top: 16%;
+      animation-delay: 1.5s;
+    }
+
+    #bubble3 {
+      width: 20px;
+      height: 20px;
+      left: 91%;
+      top: 22%;
+      animation-delay: 3s;
+    }
+
+    @keyframes bubbleUp {
+      0% {
+        transform: translateY(0);
+        opacity: 0.2;
+      }
+      50% {
+        transform: translateY(-20px);
+        opacity: 0.4;
+      }
+      100% {
+        transform: translateY(-60px);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
-  <div id="eye">
-    <div id="pupil"></div>
-    <div id="upperEyelid" class="eyelid"></div>
-    <div id="lowerEyelid" class="eyelid"></div>
+  <div id="eyeContainer">
+    <div id="eye">
+      <div id="pupil"></div>
+    </div>
+    <div id="sleepEyelid" class="eyelid"></div>
+
+    <!-- Sleepy Bubbles -->
+    <div id="bubble1" class="bubble"></div>
+    <div id="bubble2" class="bubble"></div>
+    <div id="bubble3" class="bubble"></div>
   </div>
+
   <script>
-    (function(){
-      const positions = [
-        {x:0.1,y:0.1},{x:0.8,y:0.2},{x:0.7,y:0.6},
-        {x:0.3,y:0.8},{x:0.5,y:0.5}
-      ];
-      const STEP = 8000;
-      const CYCLE = positions.length * STEP;
+    (function () {
       const eye = document.getElementById('eye');
       const pupil = document.getElementById('pupil');
-      const upper = document.getElementById('upperEyelid');
-      const lower = document.getElementById('lowerEyelid');
+      const lid = document.getElementById('sleepEyelid');
+      const container = document.getElementById('eyeContainer');
 
-      function blink(){
-        upper.classList.add('blinkUp');
-        lower.classList.add('blinkDown');
-        setTimeout(()=>{
-          upper.classList.remove('blinkUp');
-          lower.classList.remove('blinkDown');
-        },1000);
+      const hour = new Date().getHours();
+      const isSleeping = hour >= 2 && hour < 14;
+
+      if (isSleeping) {
+        eye.classList.add('hidden');
+        lid.classList.add('sleepLid');
+        container.classList.add('showBubbles');
+      } else {
+        const positions = [
+          { x: 0.1, y: 0.1 },
+          { x: 0.8, y: 0.2 },
+          { x: 0.7, y: 0.6 },
+          { x: 0.3, y: 0.8 },
+          { x: 0.5, y: 0.5 },
+        ];
+        const STEP = 8000;
+        const CYCLE = positions.length * STEP;
+
+        function moveTo(p) {
+          const rect = eye.getBoundingClientRect();
+          const tx = p.x * (window.innerWidth - rect.width);
+          const ty = p.y * (window.innerHeight - rect.height);
+          eye.style.left = tx + 'px';
+          eye.style.top = ty + 'px';
+          pupil.style.left = p.x > 0.5 ? '80%' : '20%';
+          pupil.style.top = p.y > 0.5 ? '80%' : '20%';
+          setTimeout(() => {
+            pupil.style.left = '50%';
+            pupil.style.top = '50%';
+          }, 3000);
+        }
+
+        function tick() {
+          const now = Date.now() % CYCLE;
+          const idx = Math.floor(now / STEP);
+          moveTo(positions[idx]);
+          setTimeout(tick, STEP - (now % STEP));
+        }
+
+        tick();
       }
-      function moveTo(p){
-        const rect = eye.getBoundingClientRect();
-        const tx = p.x * (window.innerWidth - rect.width);
-        const ty = p.y * (window.innerHeight - rect.height);
-        eye.style.left = tx + 'px';
-        eye.style.top  = ty + 'px';
-        pupil.style.left = p.x > 0.5 ? '80%' : '20%';
-        pupil.style.top  = p.y > 0.5 ? '80%' : '20%';
-        setTimeout(()=>{
-          pupil.style.left = '50%';
-          pupil.style.top  = '50%';
-        },3000);
+
+      // Refresh exactly at 02:01 and 14:01
+      function scheduleTargetRefresh() {
+        const now = new Date();
+        const next02 = new Date(now); next02.setHours(2, 1, 0, 0);
+        const next14 = new Date(now); next14.setHours(14, 1, 0, 0);
+        if (next02 <= now) next02.setDate(next02.getDate() + 1);
+        if (next14 <= now) next14.setDate(next14.getDate() + 1);
+        const nextTarget = next02 < next14 ? next02 : next14;
+        setTimeout(() => location.reload(), nextTarget - now);
       }
-      function tick(){
-        const now = Date.now() % CYCLE;
-        const idx = Math.floor(now / STEP);
-        moveTo(positions[idx]);
-        blink();
-        const until = STEP - (now % STEP);
-        setTimeout(tick, until);
-      }
-      tick();
-      // fallback JS refresh every hour
-      setInterval(()=> location.reload(), 3600 * 1000);
+
+      scheduleTargetRefresh();
+      setInterval(() => location.reload(), 3600 * 1000); // fallback
     })();
   </script>
 </body>
