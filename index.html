@@ -142,6 +142,27 @@
         opacity: 0;
       }
     }
+
+    #blinkLid {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: #555;
+      border-radius: 50%;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0;
+      animation: none;
+    }
+
+    @keyframes blink {
+      0% { opacity: 0; transform: scaleY(0); }
+      40% { opacity: 1; transform: scaleY(1); }
+      60% { opacity: 1; transform: scaleY(1); }
+      100% { opacity: 0; transform: scaleY(0); }
+    }
   </style>
 </head>
 <body>
@@ -149,6 +170,7 @@
     <div id="eye">
       <div id="pupil"></div>
     </div>
+    <div id="blinkLid"></div>
     <div id="sleepEyelid" class="eyelid"></div>
 
     <!-- Sleepy Bubbles -->
@@ -163,6 +185,7 @@
       const pupil = document.getElementById('pupil');
       const lid = document.getElementById('sleepEyelid');
       const container = document.getElementById('eyeContainer');
+      const blinkLid = document.getElementById('blinkLid');
 
       const hour = new Date().getHours();
       const isSleeping = hour >= 1 && hour < 13;
@@ -183,13 +206,21 @@
         const CYCLE = positions.length * STEP;
 
         function moveTo(p) {
-          const rect = eye.getBoundingClientRect();
-          const tx = p.x * (window.innerWidth - rect.width);
-          const ty = p.y * (window.innerHeight - rect.height);
+          const eyeWidth = eye.offsetWidth;
+          const eyeHeight = eye.offsetHeight;
+
+          const maxX = window.innerWidth - eyeWidth;
+          const maxY = window.innerHeight - eyeHeight;
+
+          const tx = Math.max(0, Math.min(p.x * maxX, maxX));
+          const ty = Math.max(0, Math.min(p.y * maxY, maxY));
+
           eye.style.left = tx + 'px';
           eye.style.top = ty + 'px';
+
           pupil.style.left = p.x > 0.5 ? '80%' : '20%';
           pupil.style.top = p.y > 0.5 ? '80%' : '20%';
+
           setTimeout(() => {
             pupil.style.left = '50%';
             pupil.style.top = '50%';
@@ -203,10 +234,20 @@
           setTimeout(tick, STEP - (now % STEP));
         }
 
+        function randomBlink() {
+          blinkLid.style.animation = 'blink 0.6s ease-in-out';
+          setTimeout(() => {
+            blinkLid.style.animation = 'none';
+          }, 600);
+          const next = 5000 + Math.random() * 5000;
+          setTimeout(randomBlink, next);
+        }
+
         tick();
+        randomBlink();
       }
 
-      // Refresh exactly at 01:01 and 13:01
+      // Refresh exactly at 01:01 or 13:01
       function scheduleTargetRefresh() {
         const now = new Date();
         const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
@@ -218,9 +259,8 @@
       }
 
       scheduleTargetRefresh();
-      setInterval(() => location.reload(), 3600 * 1000); // fallback
+      setInterval(() => location.reload(), 3600 * 1000); // fallback refresh every hour
     })();
   </script>
 </body>
 </html>
-
