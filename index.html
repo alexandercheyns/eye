@@ -91,7 +91,6 @@
       display: none;
     }
 
-    /* Sleepy Bubbles */
     .bubble {
       position: absolute;
       border-radius: 50%;
@@ -166,7 +165,7 @@
       const container = document.getElementById('eyeContainer');
 
       const hour = new Date().getHours();
-      const isSleeping = hour >= 2 && hour < 14;
+      const isSleeping = hour >= 1 && hour < 13;
 
       if (isSleeping) {
         eye.classList.add('hidden');
@@ -207,14 +206,14 @@
         tick();
       }
 
-      // Refresh exactly at 02:01 and 14:01
+      // Refresh exactly at 01:01 and 13:01
       function scheduleTargetRefresh() {
         const now = new Date();
-        const next02 = new Date(now); next02.setHours(2, 1, 0, 0);
-        const next14 = new Date(now); next14.setHours(14, 1, 0, 0);
-        if (next02 <= now) next02.setDate(next02.getDate() + 1);
-        if (next14 <= now) next14.setDate(next14.getDate() + 1);
-        const nextTarget = next02 < next14 ? next02 : next14;
+        const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
+        const next13 = new Date(now); next13.setHours(13, 1, 0, 0);
+        if (next01 <= now) next01.setDate(next01.getDate() + 1);
+        if (next13 <= now) next13.setDate(next13.getDate() + 1);
+        const nextTarget = next01 < next13 ? next01 : next13;
         setTimeout(() => location.reload(), nextTarget - now);
       }
 
@@ -224,3 +223,4 @@
   </script>
 </body>
 </html>
+
