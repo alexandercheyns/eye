@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sleepy Eye with Bubbles</title>
+  <title>Realistic Blinking Eye</title>
   <style>
     html, body {
       margin: 0;
@@ -16,7 +16,7 @@
     }
 
     #eye {
-      position: fixed; /* so it's relative to the window */
+      position: fixed;
       width: 600px;
       height: 600px;
       background: #fff;
@@ -52,18 +52,53 @@
     .eyelid {
       position: fixed;
       width: 600px;
+      height: 600px;
+      background: #000;
+      border-radius: 50%;
+      left: 0;
+      top: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    #upperEyelid {
+      top: -100%;
+      transition: top 0.8s ease-in-out;
+    }
+
+    #lowerEyelid {
+      bottom: -100%;
+      transition: bottom 0.8s ease-in-out;
+    }
+
+    @keyframes blinkUp {
+      0%, 100% { top: -100%; }
+      50% { top: 0; }
+    }
+
+    @keyframes blinkDown {
+      0%, 100% { bottom: -100%; }
+      50% { bottom: 0; }
+    }
+
+    .blinkUp {
+      animation: blinkUp 1s ease-in-out;
+    }
+
+    .blinkDown {
+      animation: blinkDown 1s ease-in-out;
+    }
+
+    .sleepLid {
+      position: fixed;
+      width: 600px;
       height: 100px;
       background: #555;
       border-radius: 50px;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      z-index: 2;
-      display: none;
-    }
-
-    .sleepLid {
-      display: block;
+      z-index: 4;
       animation: floatSleep 4s ease-in-out infinite;
     }
 
@@ -82,7 +117,7 @@
       background: rgba(255, 255, 255, 0.15);
       animation: bubbleUp 5s linear infinite;
       display: none;
-      z-index: 3;
+      z-index: 5;
     }
 
     .showBubbles .bubble {
@@ -128,44 +163,6 @@
       }
     }
 
-    #blinkLid {
-      position: fixed;
-      width: 600px;
-      height: 600px;
-      background: #555;
-      border-radius: 50%;
-      left: 0;
-      top: 0;
-      z-index: 5;
-      pointer-events: none;
-      opacity: 0;
-      transform: scaleY(0);
-      transform-origin: center center;
-    }
-
-    .blinking {
-      animation: blink 0.6s ease-in-out forwards;
-    }
-
-    @keyframes blink {
-      0% {
-        opacity: 0;
-        transform: scaleY(0);
-      }
-      30% {
-        opacity: 1;
-        transform: scaleY(1);
-      }
-      70% {
-        opacity: 1;
-        transform: scaleY(1);
-      }
-      100% {
-        opacity: 0;
-        transform: scaleY(0);
-      }
-    }
-
     .hidden {
       display: none;
     }
@@ -175,8 +172,13 @@
   <div id="eye">
     <div id="pupil"></div>
   </div>
-  <div id="blinkLid"></div>
-  <div id="sleepEyelid" class="eyelid"></div>
+
+  <!-- Eyelids for blinking -->
+  <div id="upperEyelid" class="eyelid"></div>
+  <div id="lowerEyelid" class="eyelid"></div>
+
+  <!-- Sleepy Lid -->
+  <div id="sleepEyelid" class="hidden"></div>
 
   <!-- Sleepy Bubbles -->
   <div id="bubble1" class="bubble"></div>
@@ -187,15 +189,16 @@
     (function () {
       const eye = document.getElementById('eye');
       const pupil = document.getElementById('pupil');
-      const blinkLid = document.getElementById('blinkLid');
-      const lid = document.getElementById('sleepEyelid');
-
+      const upperLid = document.getElementById('upperEyelid');
+      const lowerLid = document.getElementById('lowerEyelid');
+      const sleepLid = document.getElementById('sleepEyelid');
       const hour = new Date().getHours();
       const isSleeping = hour >= 1 && hour < 13;
 
       if (isSleeping) {
         eye.classList.add('hidden');
-        lid.classList.add('sleepLid');
+        sleepLid.classList.remove('hidden');
+        sleepLid.classList.add('sleepLid');
         document.body.classList.add('showBubbles');
       } else {
         const positions = [
@@ -205,7 +208,6 @@
           { x: 0.3, y: 0.7 },
           { x: 0.45, y: 0.45 },
         ];
-
         const STEP = 8000;
         const CYCLE = positions.length * STEP;
 
@@ -237,22 +239,27 @@
           setTimeout(tick, STEP - (now % STEP));
         }
 
-        function randomBlink() {
-          blinkLid.classList.add('blinking');
+        function blink() {
+          upperLid.classList.add('blinkUp');
+          lowerLid.classList.add('blinkDown');
+
           const eyeRect = eye.getBoundingClientRect();
-          blinkLid.style.left = eyeRect.left + 'px';
-          blinkLid.style.top = eyeRect.top + 'px';
+          upperLid.style.left = eyeRect.left + 'px';
+          upperLid.style.top = eyeRect.top + 'px';
+          lowerLid.style.left = eyeRect.left + 'px';
+          lowerLid.style.top = eyeRect.top + 'px';
 
           setTimeout(() => {
-            blinkLid.classList.remove('blinking');
-          }, 600);
+            upperLid.classList.remove('blinkUp');
+            lowerLid.classList.remove('blinkDown');
+          }, 1000);
 
           const next = 5000 + Math.random() * 5000;
-          setTimeout(randomBlink, next);
+          setTimeout(blink, next);
         }
 
         tick();
-        randomBlink();
+        blink();
       }
 
       function scheduleTargetRefresh() {
