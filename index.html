@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Realistic Blinking Eye</title>
+  <title>Fixed Blinking Eye</title>
   <style>
     html, body {
       margin: 0;
@@ -49,44 +49,41 @@
       left: 40px;
     }
 
+    /* Real eyelids INSIDE the eye */
     .eyelid {
-      position: fixed;
-      width: 600px;
-      height: 600px;
+      position: absolute;
+      width: 100%;
+      height: 50%;
       background: #000;
-      border-radius: 50%;
       left: 0;
-      top: 0;
       z-index: 3;
       pointer-events: none;
     }
 
     #upperEyelid {
-      top: -100%;
-      transition: top 0.8s ease-in-out;
+      top: -50%;
     }
 
     #lowerEyelid {
-      bottom: -100%;
-      transition: bottom 0.8s ease-in-out;
+      bottom: -50%;
     }
 
-    @keyframes blinkUp {
-      0%, 100% { top: -100%; }
+    @keyframes blinkUpper {
+      0%, 100% { top: -50%; }
       50% { top: 0; }
     }
 
-    @keyframes blinkDown {
-      0%, 100% { bottom: -100%; }
+    @keyframes blinkLower {
+      0%, 100% { bottom: -50%; }
       50% { bottom: 0; }
     }
 
     .blinkUp {
-      animation: blinkUp 1s ease-in-out;
+      animation: blinkUpper 0.5s ease-in-out;
     }
 
     .blinkDown {
-      animation: blinkDown 1s ease-in-out;
+      animation: blinkLower 0.5s ease-in-out;
     }
 
     .sleepLid {
@@ -171,11 +168,9 @@
 <body>
   <div id="eye">
     <div id="pupil"></div>
+    <div id="upperEyelid" class="eyelid"></div>
+    <div id="lowerEyelid" class="eyelid"></div>
   </div>
-
-  <!-- Eyelids for blinking -->
-  <div id="upperEyelid" class="eyelid"></div>
-  <div id="lowerEyelid" class="eyelid"></div>
 
   <!-- Sleepy Lid -->
   <div id="sleepEyelid" class="hidden"></div>
@@ -243,16 +238,10 @@
           upperLid.classList.add('blinkUp');
           lowerLid.classList.add('blinkDown');
 
-          const eyeRect = eye.getBoundingClientRect();
-          upperLid.style.left = eyeRect.left + 'px';
-          upperLid.style.top = eyeRect.top + 'px';
-          lowerLid.style.left = eyeRect.left + 'px';
-          lowerLid.style.top = eyeRect.top + 'px';
-
           setTimeout(() => {
             upperLid.classList.remove('blinkUp');
             lowerLid.classList.remove('blinkDown');
-          }, 1000);
+          }, 500);
 
           const next = 5000 + Math.random() * 5000;
           setTimeout(blink, next);
