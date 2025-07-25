@@ -12,22 +12,11 @@
       width: 100%;
       height: 100%;
       background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
-      position: relative;
-    }
-
-    #eyeContainer {
-      position: relative;
-      width: 600px;
-      height: 600px;
-      z-index: 1;
     }
 
     #eye {
-      position: absolute;
+      position: fixed; /* so it's relative to the window */
       width: 600px;
       height: 600px;
       background: #fff;
@@ -61,7 +50,7 @@
     }
 
     .eyelid {
-      position: absolute;
+      position: fixed;
       width: 600px;
       height: 100px;
       background: #555;
@@ -87,12 +76,8 @@
       }
     }
 
-    .hidden {
-      display: none;
-    }
-
     .bubble {
-      position: absolute;
+      position: fixed;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.15);
       animation: bubbleUp 5s linear infinite;
@@ -144,48 +129,66 @@
     }
 
     #blinkLid {
-      position: absolute;
+      position: fixed;
       width: 600px;
       height: 600px;
       background: #555;
       border-radius: 50%;
       left: 0;
       top: 0;
-      z-index: 3;
+      z-index: 5;
       pointer-events: none;
       opacity: 0;
-      animation: none;
+      transform: scaleY(0);
+      transform-origin: center center;
+    }
+
+    .blinking {
+      animation: blink 0.6s ease-in-out forwards;
     }
 
     @keyframes blink {
-      0% { opacity: 0; transform: scaleY(0); }
-      40% { opacity: 1; transform: scaleY(1); }
-      60% { opacity: 1; transform: scaleY(1); }
-      100% { opacity: 0; transform: scaleY(0); }
+      0% {
+        opacity: 0;
+        transform: scaleY(0);
+      }
+      30% {
+        opacity: 1;
+        transform: scaleY(1);
+      }
+      70% {
+        opacity: 1;
+        transform: scaleY(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scaleY(0);
+      }
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div id="eyeContainer">
-    <div id="eye">
-      <div id="pupil"></div>
-    </div>
-    <div id="blinkLid"></div>
-    <div id="sleepEyelid" class="eyelid"></div>
-
-    <!-- Sleepy Bubbles -->
-    <div id="bubble1" class="bubble"></div>
-    <div id="bubble2" class="bubble"></div>
-    <div id="bubble3" class="bubble"></div>
+  <div id="eye">
+    <div id="pupil"></div>
   </div>
+  <div id="blinkLid"></div>
+  <div id="sleepEyelid" class="eyelid"></div>
+
+  <!-- Sleepy Bubbles -->
+  <div id="bubble1" class="bubble"></div>
+  <div id="bubble2" class="bubble"></div>
+  <div id="bubble3" class="bubble"></div>
 
   <script>
     (function () {
       const eye = document.getElementById('eye');
       const pupil = document.getElementById('pupil');
-      const lid = document.getElementById('sleepEyelid');
-      const container = document.getElementById('eyeContainer');
       const blinkLid = document.getElementById('blinkLid');
+      const lid = document.getElementById('sleepEyelid');
 
       const hour = new Date().getHours();
       const isSleeping = hour >= 1 && hour < 13;
@@ -193,27 +196,27 @@
       if (isSleeping) {
         eye.classList.add('hidden');
         lid.classList.add('sleepLid');
-        container.classList.add('showBubbles');
+        document.body.classList.add('showBubbles');
       } else {
         const positions = [
-          { x: 0.1, y: 0.1 },
-          { x: 0.8, y: 0.2 },
-          { x: 0.7, y: 0.6 },
-          { x: 0.3, y: 0.8 },
-          { x: 0.5, y: 0.5 },
+          { x: 0.05, y: 0.05 },
+          { x: 0.75, y: 0.2 },
+          { x: 0.6, y: 0.6 },
+          { x: 0.3, y: 0.7 },
+          { x: 0.45, y: 0.45 },
         ];
+
         const STEP = 8000;
         const CYCLE = positions.length * STEP;
 
         function moveTo(p) {
-          const eyeWidth = eye.offsetWidth;
-          const eyeHeight = eye.offsetHeight;
+          const eyeW = eye.offsetWidth;
+          const eyeH = eye.offsetHeight;
+          const maxX = window.innerWidth - eyeW;
+          const maxY = window.innerHeight - eyeH;
 
-          const maxX = window.innerWidth - eyeWidth;
-          const maxY = window.innerHeight - eyeHeight;
-
-          const tx = Math.max(0, Math.min(p.x * maxX, maxX));
-          const ty = Math.max(0, Math.min(p.y * maxY, maxY));
+          const tx = Math.max(0, Math.min(p.x * window.innerWidth, maxX));
+          const ty = Math.max(0, Math.min(p.y * window.innerHeight, maxY));
 
           eye.style.left = tx + 'px';
           eye.style.top = ty + 'px';
@@ -235,10 +238,15 @@
         }
 
         function randomBlink() {
-          blinkLid.style.animation = 'blink 0.6s ease-in-out';
+          blinkLid.classList.add('blinking');
+          const eyeRect = eye.getBoundingClientRect();
+          blinkLid.style.left = eyeRect.left + 'px';
+          blinkLid.style.top = eyeRect.top + 'px';
+
           setTimeout(() => {
-            blinkLid.style.animation = 'none';
+            blinkLid.classList.remove('blinking');
           }, 600);
+
           const next = 5000 + Math.random() * 5000;
           setTimeout(randomBlink, next);
         }
@@ -247,7 +255,6 @@
         randomBlink();
       }
 
-      // Refresh exactly at 01:01 or 13:01
       function scheduleTargetRefresh() {
         const now = new Date();
         const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
@@ -259,7 +266,7 @@
       }
 
       scheduleTargetRefresh();
-      setInterval(() => location.reload(), 3600 * 1000); // fallback refresh every hour
+      setInterval(() => location.reload(), 3600 * 1000); // fallback every hour
     })();
   </script>
 </body>
