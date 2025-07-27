@@ -176,14 +176,15 @@
       line-height: 600px;
       width: 600px;
       height: 600px;
+      transform: rotate(180deg); /* <- Rotate heart to match flipped screen */
     }
 
     @keyframes pulse {
       0%, 100% {
-        transform: scale(1);
+        transform: scale(1) rotate(180deg);
       }
       50% {
-        transform: scale(1.2);
+        transform: scale(1.2) rotate(180deg);
       }
     }
   </style>
