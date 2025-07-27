@@ -189,10 +189,11 @@
 
     #loopVideo {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 50%;
+      left: 50%;
+      width: 90vw;
+      height: 90vh;
+      transform: translate(-50%, -50%);
       object-fit: cover;
       z-index: 0;
     }
@@ -213,7 +214,7 @@
 
   <div id="heart">❤️</div>
 
-  <!-- Video shown on Sunday and Monday -->
+  <!-- Scaled-down Video for Sunday/Monday -->
   <video id="loopVideo" class="hidden" autoplay muted loop playsinline>
     <source src="vogel1.mp4" type="video/mp4">
     Your browser does not support the video tag.
