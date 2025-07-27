@@ -164,7 +164,6 @@
       display: none;
     }
 
-    /* Heart style */
     #heart {
       position: fixed;
       font-size: 300px;
@@ -176,7 +175,7 @@
       line-height: 600px;
       width: 600px;
       height: 600px;
-      transform: rotate(180deg); /* <- Rotate heart to match flipped screen */
+      transform: rotate(180deg);
     }
 
     @keyframes pulse {
@@ -187,6 +186,16 @@
         transform: scale(1.2) rotate(180deg);
       }
     }
+
+    #loopVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
   </style>
 </head>
 <body>
@@ -196,16 +205,19 @@
     <div id="lowerEyelid" class="eyelid"></div>
   </div>
 
-  <!-- Sleepy Lid -->
   <div id="sleepEyelid" class="hidden"></div>
 
-  <!-- Sleepy Bubbles -->
   <div id="bubble1" class="bubble"></div>
   <div id="bubble2" class="bubble"></div>
   <div id="bubble3" class="bubble"></div>
 
-  <!-- Heart -->
   <div id="heart">❤️</div>
+
+  <!-- Video shown on Sunday and Monday -->
+  <video id="loopVideo" class="hidden" autoplay muted loop playsinline>
+    <source src="vogel1.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
 
   <script>
     (function () {
@@ -215,31 +227,19 @@
       const lowerLid = document.getElementById('lowerEyelid');
       const sleepLid = document.getElementById('sleepEyelid');
       const heart = document.getElementById('heart');
+      const loopVideo = document.getElementById('loopVideo');
 
-      const hour = new Date().getHours();
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday, 1 = Monday
+      const hour = now.getHours();
+
+      const isVideoDay = day === 0 || day === 1;
       const isSleeping = hour >= 1 && hour < 13;
 
-      function showHeartTemporarily() {
-        const heartDuration = 2000; // 2 seconds
-        const eyeBox = eye.getBoundingClientRect();
-        heart.style.left = eyeBox.left + 'px';
-        heart.style.top = eyeBox.top + 'px';
-        heart.style.display = 'block';
-        eye.style.visibility = 'hidden';
-
-        setTimeout(() => {
-          heart.style.display = 'none';
-          eye.style.visibility = 'visible';
-          scheduleNextHeart();
-        }, heartDuration);
-      }
-
-      function scheduleNextHeart() {
-        const nextDelay = 10000 + Math.random() * 20000; // 10–30 seconds
-        setTimeout(showHeartTemporarily, nextDelay);
-      }
-
-      if (isSleeping) {
+      if (isVideoDay) {
+        eye.classList.add('hidden');
+        loopVideo.classList.remove('hidden');
+      } else if (isSleeping) {
         eye.classList.add('hidden');
         sleepLid.classList.remove('hidden');
         sleepLid.classList.add('sleepLid');
@@ -296,13 +296,32 @@
           setTimeout(blink, next);
         }
 
+        function showHeartTemporarily() {
+          const heartDuration = 2000;
+          const eyeBox = eye.getBoundingClientRect();
+          heart.style.left = eyeBox.left + 'px';
+          heart.style.top = eyeBox.top + 'px';
+          heart.style.display = 'block';
+          eye.style.visibility = 'hidden';
+
+          setTimeout(() => {
+            heart.style.display = 'none';
+            eye.style.visibility = 'visible';
+            scheduleNextHeart();
+          }, heartDuration);
+        }
+
+        function scheduleNextHeart() {
+          const nextDelay = 10000 + Math.random() * 20000;
+          setTimeout(showHeartTemporarily, nextDelay);
+        }
+
         tick();
         blink();
         scheduleNextHeart();
       }
 
       function scheduleTargetRefresh() {
-        const now = new Date();
         const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
         const next13 = new Date(now); next13.setHours(13, 1, 0, 0);
         if (next01 <= now) next01.setDate(next01.getDate() + 1);
