@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fixed Blinking Eye</title>
+  <title>Upside Down Pulsing Heart Eye</title>
   <style>
     html, body {
       margin: 0;
@@ -13,6 +13,7 @@
       height: 100%;
       background: #000;
       overflow: hidden;
+      transform: rotate(180deg);
     }
 
     #eye {
@@ -49,7 +50,6 @@
       left: 40px;
     }
 
-    /* Real eyelids INSIDE the eye */
     .eyelid {
       position: absolute;
       width: 100%;
@@ -163,6 +163,29 @@
     .hidden {
       display: none;
     }
+
+    /* Heart style */
+    #heart {
+      position: fixed;
+      font-size: 300px;
+      z-index: 10;
+      display: none;
+      pointer-events: none;
+      animation: pulse 1s infinite ease-in-out;
+      text-align: center;
+      line-height: 600px;
+      width: 600px;
+      height: 600px;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+    }
   </style>
 </head>
 <body>
@@ -180,6 +203,9 @@
   <div id="bubble2" class="bubble"></div>
   <div id="bubble3" class="bubble"></div>
 
+  <!-- Heart -->
+  <div id="heart">❤️</div>
+
   <script>
     (function () {
       const eye = document.getElementById('eye');
@@ -187,8 +213,30 @@
       const upperLid = document.getElementById('upperEyelid');
       const lowerLid = document.getElementById('lowerEyelid');
       const sleepLid = document.getElementById('sleepEyelid');
+      const heart = document.getElementById('heart');
+
       const hour = new Date().getHours();
       const isSleeping = hour >= 1 && hour < 13;
+
+      function showHeartTemporarily() {
+        const heartDuration = 2000; // 2 seconds
+        const eyeBox = eye.getBoundingClientRect();
+        heart.style.left = eyeBox.left + 'px';
+        heart.style.top = eyeBox.top + 'px';
+        heart.style.display = 'block';
+        eye.style.visibility = 'hidden';
+
+        setTimeout(() => {
+          heart.style.display = 'none';
+          eye.style.visibility = 'visible';
+          scheduleNextHeart();
+        }, heartDuration);
+      }
+
+      function scheduleNextHeart() {
+        const nextDelay = 10000 + Math.random() * 20000; // 10–30 seconds
+        setTimeout(showHeartTemporarily, nextDelay);
+      }
 
       if (isSleeping) {
         eye.classList.add('hidden');
@@ -249,6 +297,7 @@
 
         tick();
         blink();
+        scheduleNextHeart();
       }
 
       function scheduleTargetRefresh() {
@@ -262,7 +311,7 @@
       }
 
       scheduleTargetRefresh();
-      setInterval(() => location.reload(), 3600 * 1000); // fallback every hour
+      setInterval(() => location.reload(), 3600 * 1000);
     })();
   </script>
 </body>
