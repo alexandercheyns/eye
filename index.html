@@ -20,47 +20,214 @@
       display: none;
     }
 
-   
-
-
     video.loopVideo {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 80vw;
-  height: 100vh;
-  transform: translate(-50%, -50%) rotate(180deg);
-  object-fit: cover;
-  z-index: 0;
-}
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 80vw;
+      height: 100vh;
+      transform: translate(-50%, -50%) rotate(180deg);
+      object-fit: cover;
+      z-index: 0;
+    }
 
-    /* The rest of your original styles (eye, pupil, eyelids, etc.) remain unchanged */
-    /* ... truncated for brevity ... */
+    #eye {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: #fff;
+      border-radius: 50%;
+      overflow: hidden;
+      transition: left 3s ease-in-out, top 3s ease-in-out;
+      z-index: 1;
+    }
+
+    #pupil {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: #000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 3s ease-in-out, top 3s ease-in-out;
+    }
+
+    #pupil::before {
+      content: '';
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: #fff;
+      border-radius: 50%;
+      top: 40px;
+      left: 40px;
+    }
+
+    .eyelid {
+      position: absolute;
+      width: 100%;
+      height: 50%;
+      background: #000;
+      left: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    #upperEyelid {
+      top: -50%;
+    }
+
+    #lowerEyelid {
+      bottom: -50%;
+    }
+
+    @keyframes blinkUpper {
+      0%, 100% { top: -50%; }
+      50% { top: 0; }
+    }
+
+    @keyframes blinkLower {
+      0%, 100% { bottom: -50%; }
+      50% { bottom: 0; }
+    }
+
+    .blinkUp {
+      animation: blinkUpper 0.5s ease-in-out;
+    }
+
+    .blinkDown {
+      animation: blinkLower 0.5s ease-in-out;
+    }
+
+    .sleepLid {
+      position: fixed;
+      width: 600px;
+      height: 100px;
+      background: #555;
+      border-radius: 50px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      animation: floatSleep 4s ease-in-out infinite;
+    }
+
+    @keyframes floatSleep {
+      0%, 100% {
+        transform: translate(-50%, -35%);
+      }
+      50% {
+        transform: translate(-50%, -65%);
+      }
+    }
+
+    .bubble {
+      position: fixed;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      animation: bubbleUp 5s linear infinite;
+      display: none;
+      z-index: 5;
+    }
+
+    .showBubbles .bubble {
+      display: block;
+    }
+
+    #bubble1 {
+      width: 40px;
+      height: 40px;
+      left: 85%;
+      top: 10%;
+      animation-delay: 0s;
+    }
+
+    #bubble2 {
+      width: 30px;
+      height: 30px;
+      left: 88%;
+      top: 16%;
+      animation-delay: 1.5s;
+    }
+
+    #bubble3 {
+      width: 20px;
+      height: 20px;
+      left: 91%;
+      top: 22%;
+      animation-delay: 3s;
+    }
+
+    @keyframes bubbleUp {
+      0% {
+        transform: translateY(0);
+        opacity: 0.2;
+      }
+      50% {
+        transform: translateY(-20px);
+        opacity: 0.4;
+      }
+      100% {
+        transform: translateY(-60px);
+        opacity: 0;
+      }
+    }
+
+    #heart {
+      position: fixed;
+      font-size: 300px;
+      z-index: 10;
+      display: none;
+      pointer-events: none;
+      animation: pulse 1s infinite ease-in-out;
+      text-align: center;
+      line-height: 600px;
+      width: 600px;
+      height: 600px;
+      transform: rotate(180deg);
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1) rotate(180deg);
+      }
+      50% {
+        transform: scale(1.2) rotate(180deg);
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- Eye animation -->
   <div id="eye">
     <div id="pupil"></div>
     <div id="upperEyelid" class="eyelid"></div>
     <div id="lowerEyelid" class="eyelid"></div>
   </div>
+
   <div id="sleepEyelid" class="hidden"></div>
   <div id="bubble1" class="bubble"></div>
   <div id="bubble2" class="bubble"></div>
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
 
-  <!-- Two video elements for looping -->
-  <video id="video1" class="loopVideo hidden" muted playsinline>
+  <!-- Infinite loop video for Sunday/Monday -->
+  <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline>
     <source src="vogel1.mp4" type="video/mp4">
-  </video>
-  <video id="video2" class="loopVideo hidden" muted playsinline>
-    <source src="bernardus1.mp4" type="video/mp4">
+    Your browser does not support the video tag.
   </video>
 
   <script>
     (function () {
+      const eye = document.getElementById('eye');
+      const pupil = document.getElementById('pupil');
+      const upperLid = document.getElementById('upperEyelid');
+      const lowerLid = document.getElementById('lowerEyelid');
+      const sleepLid = document.getElementById('sleepEyelid');
+      const heart = document.getElementById('heart');
+      const loopVideo = document.getElementById('loopVideo');
+
       const now = new Date();
       const day = now.getDay(); // 0 = Sunday, 1 = Monday
       const hour = now.getHours();
@@ -68,51 +235,96 @@
       const isVideoDay = day === 0 || day === 1;
       const isSleeping = hour >= 1 && hour < 13;
 
-      const eye = document.getElementById('eye');
-      const sleepLid = document.getElementById('sleepEyelid');
-      const video1 = document.getElementById('video1');
-      const video2 = document.getElementById('video2');
-
       if (isVideoDay) {
         eye.classList.add('hidden');
-        let currentVideo = video1;
-        let nextVideo = video2;
-        let playCount = 0;
-        const maxPlays = 10;
-
-        currentVideo.classList.remove('hidden');
-        currentVideo.play();
-
-        currentVideo.addEventListener('ended', handleEnded);
-
-        function handleEnded() {
-          playCount++;
-          if (playCount < maxPlays) {
-            currentVideo.play();
-          } else {
-            // Switch videos
-            playCount = 0;
-            currentVideo.classList.add('hidden');
-            nextVideo.classList.remove('hidden');
-            nextVideo.play();
-            currentVideo.removeEventListener('ended', handleEnded);
-            // Swap references
-            [currentVideo, nextVideo] = [nextVideo, currentVideo];
-            currentVideo.addEventListener('ended', handleEnded);
-          }
-        }
-
+        loopVideo.classList.remove('hidden');
       } else if (isSleeping) {
         eye.classList.add('hidden');
         sleepLid.classList.remove('hidden');
         sleepLid.classList.add('sleepLid');
         document.body.classList.add('showBubbles');
       } else {
-        // Existing moving eye + heartbeat logic remains
-        // ... omitted for brevity ...
+        startEyeBehavior();
       }
 
-      // Refresh logic remains
+      function startEyeBehavior() {
+        eye.classList.remove('hidden');
+        const positions = [
+          { x: 0.05, y: 0.05 },
+          { x: 0.75, y: 0.2 },
+          { x: 0.6, y: 0.6 },
+          { x: 0.3, y: 0.7 },
+          { x: 0.45, y: 0.45 },
+        ];
+        const STEP = 8000;
+        const CYCLE = positions.length * STEP;
+
+        function moveTo(p) {
+          const eyeW = eye.offsetWidth;
+          const eyeH = eye.offsetHeight;
+          const maxX = window.innerWidth - eyeW;
+          const maxY = window.innerHeight - eyeH;
+
+          const tx = Math.max(0, Math.min(p.x * window.innerWidth, maxX));
+          const ty = Math.max(0, Math.min(p.y * window.innerHeight, maxY));
+
+          eye.style.left = tx + 'px';
+          eye.style.top = ty + 'px';
+
+          pupil.style.left = p.x > 0.5 ? '80%' : '20%';
+          pupil.style.top = p.y > 0.5 ? '80%' : '20%';
+
+          setTimeout(() => {
+            pupil.style.left = '50%';
+            pupil.style.top = '50%';
+          }, 3000);
+        }
+
+        function tick() {
+          const now = Date.now() % CYCLE;
+          const idx = Math.floor(now / STEP);
+          moveTo(positions[idx]);
+          setTimeout(tick, STEP - (now % STEP));
+        }
+
+        function blink() {
+          upperLid.classList.add('blinkUp');
+          lowerLid.classList.add('blinkDown');
+
+          setTimeout(() => {
+            upperLid.classList.remove('blinkUp');
+            lowerLid.classList.remove('blinkDown');
+          }, 500);
+
+          const next = 5000 + Math.random() * 5000;
+          setTimeout(blink, next);
+        }
+
+        function showHeartTemporarily() {
+          const heartDuration = 2000;
+          const eyeBox = eye.getBoundingClientRect();
+          heart.style.left = eyeBox.left + 'px';
+          heart.style.top = eyeBox.top + 'px';
+          heart.style.display = 'block';
+          eye.style.visibility = 'hidden';
+
+          setTimeout(() => {
+            heart.style.display = 'none';
+            eye.style.visibility = 'visible';
+            scheduleNextHeart();
+          }, heartDuration);
+        }
+
+        function scheduleNextHeart() {
+          const nextDelay = 10000 + Math.random() * 20000;
+          setTimeout(showHeartTemporarily, nextDelay);
+        }
+
+        tick();
+        blink();
+        scheduleNextHeart();
+      }
+
       function scheduleTargetRefresh() {
         const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
         const next13 = new Date(now); next13.setHours(13, 1, 0, 0);
@@ -128,3 +340,4 @@
   </script>
 </body>
 </html>
+
