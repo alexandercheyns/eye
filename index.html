@@ -31,8 +31,7 @@
       z-index: 0;
     }
 
-    /* Rotate video an additional 180deg (so it appears upside down) */
-    .rotate180 {
+    .omerVideo {
       transform: translate(-50%, -50%) rotate(0deg);
     }
 
@@ -120,12 +119,8 @@
     }
 
     @keyframes floatSleep {
-      0%, 100% {
-        transform: translate(-50%, -35%);
-      }
-      50% {
-        transform: translate(-50%, -65%);
-      }
+      0%, 100% { transform: translate(-50%, -35%); }
+      50% { transform: translate(-50%, -65%); }
     }
 
     .bubble {
@@ -166,18 +161,9 @@
     }
 
     @keyframes bubbleUp {
-      0% {
-        transform: translateY(0);
-        opacity: 0.2;
-      }
-      50% {
-        transform: translateY(-20px);
-        opacity: 0.4;
-      }
-      100% {
-        transform: translateY(-60px);
-        opacity: 0;
-      }
+      0% { transform: translateY(0); opacity: 0.2; }
+      50% { transform: translateY(-20px); opacity: 0.4; }
+      100% { transform: translateY(-60px); opacity: 0; }
     }
 
     #heart {
@@ -195,12 +181,8 @@
     }
 
     @keyframes pulse {
-      0%, 100% {
-        transform: scale(1) rotate(180deg);
-      }
-      50% {
-        transform: scale(1.2) rotate(180deg);
-      }
+      0%, 100% { transform: scale(1) rotate(180deg); }
+      50% { transform: scale(1.2) rotate(180deg); }
     }
   </style>
 </head>
@@ -219,4 +201,138 @@
 
   <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline>
     <source id="videoSource" src="" type="video/mp4">
-    Your browser does not support the v
+    Your browser does not support the video tag.
+  </video>
+
+  <script>
+    (function () {
+      const eye = document.getElementById('eye');
+      const pupil = document.getElementById('pupil');
+      const upperLid = document.getElementById('upperEyelid');
+      const lowerLid = document.getElementById('lowerEyelid');
+      const sleepLid = document.getElementById('sleepEyelid');
+      const heart = document.getElementById('heart');
+      const loopVideo = document.getElementById('loopVideo');
+      const videoSource = document.getElementById('videoSource');
+
+      const now = new Date();
+      const day = now.getDay(); // 0 = Sunday
+      const hour = now.getHours();
+
+      const isVogelDay = day === 0 || day === 1;
+      const isOmerDay = day === 4;
+      const isSleeping = hour >= 1 && hour < 13;
+
+      if (isVogelDay) {
+        videoSource.src = "vogel1.mp4";
+        loopVideo.classList.remove("omerVideo");
+        loopVideo.load();
+        loopVideo.classList.remove('hidden');
+        eye.classList.add('hidden');
+      } else if (isOmerDay) {
+        videoSource.src = "omer1.mp4";
+        loopVideo.classList.add("omerVideo");
+        loopVideo.load();
+        loopVideo.classList.remove('hidden');
+        eye.classList.add('hidden');
+      } else if (isSleeping) {
+        eye.classList.add('hidden');
+        sleepLid.classList.remove('hidden');
+        sleepLid.classList.add('sleepLid');
+        document.body.classList.add('showBubbles');
+      } else {
+        startEyeBehavior();
+      }
+
+      function startEyeBehavior() {
+        eye.classList.remove('hidden');
+        const positions = [
+          { x: 0.05, y: 0.05 },
+          { x: 0.75, y: 0.2 },
+          { x: 0.6, y: 0.6 },
+          { x: 0.3, y: 0.7 },
+          { x: 0.45, y: 0.45 },
+        ];
+        const STEP = 8000;
+        const CYCLE = positions.length * STEP;
+
+        function moveTo(p) {
+          const eyeW = eye.offsetWidth;
+          const eyeH = eye.offsetHeight;
+          const maxX = window.innerWidth - eyeW;
+          const maxY = window.innerHeight - eyeH;
+
+          const tx = Math.max(0, Math.min(p.x * window.innerWidth, maxX));
+          const ty = Math.max(0, Math.min(p.y * window.innerHeight, maxY));
+
+          eye.style.left = tx + 'px';
+          eye.style.top = ty + 'px';
+
+          pupil.style.left = p.x > 0.5 ? '80%' : '20%';
+          pupil.style.top = p.y > 0.5 ? '80%' : '20%';
+
+          setTimeout(() => {
+            pupil.style.left = '50%';
+            pupil.style.top = '50%';
+          }, 3000);
+        }
+
+        function tick() {
+          const now = Date.now() % CYCLE;
+          const idx = Math.floor(now / STEP);
+          moveTo(positions[idx]);
+          setTimeout(tick, STEP - (now % STEP));
+        }
+
+        function blink() {
+          upperLid.classList.add('blinkUp');
+          lowerLid.classList.add('blinkDown');
+          setTimeout(() => {
+            upperLid.classList.remove('blinkUp');
+            lowerLid.classList.remove('blinkDown');
+          }, 500);
+          const next = 5000 + Math.random() * 5000;
+          setTimeout(blink, next);
+        }
+
+        function showHeartTemporarily() {
+          const heartDuration = 2000;
+          const eyeBox = eye.getBoundingClientRect();
+          heart.style.left = eyeBox.left + 'px';
+          heart.style.top = eyeBox.top + 'px';
+          heart.style.display = 'block';
+          eye.style.visibility = 'hidden';
+
+          setTimeout(() => {
+            heart.style.display = 'none';
+            eye.style.visibility = 'visible';
+            scheduleNextHeart();
+          }, heartDuration);
+        }
+
+        function scheduleNextHeart() {
+          const nextDelay = 10000 + Math.random() * 20000;
+          setTimeout(showHeartTemporarily, nextDelay);
+        }
+
+        tick();
+        blink();
+        scheduleNextHeart();
+      }
+
+      // Auto-refresh handling
+      function scheduleTargetRefresh() {
+        const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
+        const next13 = new Date(now); next13.setHours(13, 1, 0, 0);
+        if (next01 <= now) next01.setDate(next01.getDate() + 1);
+        if (next13 <= now) next13.setDate(next13.getDate() + 1);
+        const nextTarget = next01 < next13 ? next01 : next13;
+        setTimeout(() => location.reload(), nextTarget - now);
+      }
+
+      scheduleTargetRefresh();
+      setInterval(() => location.reload(), 3600 * 1000);
+    })();
+  </script>
+</body>
+</html>
