@@ -31,10 +31,6 @@
       z-index: 0;
     }
 
-    .omerVideo {
-      transform: translate(-50%, -50%) rotate(0deg);
-    }
-
     #eye {
       position: fixed;
       width: 600px;
@@ -119,8 +115,12 @@
     }
 
     @keyframes floatSleep {
-      0%, 100% { transform: translate(-50%, -35%); }
-      50% { transform: translate(-50%, -65%); }
+      0%, 100% {
+        transform: translate(-50%, -35%);
+      }
+      50% {
+        transform: translate(-50%, -65%);
+      }
     }
 
     .bubble {
@@ -161,9 +161,18 @@
     }
 
     @keyframes bubbleUp {
-      0% { transform: translateY(0); opacity: 0.2; }
-      50% { transform: translateY(-20px); opacity: 0.4; }
-      100% { transform: translateY(-60px); opacity: 0; }
+      0% {
+        transform: translateY(0);
+        opacity: 0.2;
+      }
+      50% {
+        transform: translateY(-20px);
+        opacity: 0.4;
+      }
+      100% {
+        transform: translateY(-60px);
+        opacity: 0;
+      }
     }
 
     #heart {
@@ -181,8 +190,12 @@
     }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1) rotate(180deg); }
-      50% { transform: scale(1.2) rotate(180deg); }
+      0%, 100% {
+        transform: scale(1) rotate(180deg);
+      }
+      50% {
+        transform: scale(1.2) rotate(180deg);
+      }
     }
   </style>
 </head>
@@ -199,6 +212,7 @@
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
 
+  <!-- Loop video container -->
   <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline>
     <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
@@ -219,19 +233,17 @@
       const day = now.getDay(); // 0 = Sunday
       const hour = now.getHours();
 
-      const isVogelDay = day === 0 || day === 1;
-      const isOmerDay = day === 4;
+      const isVogelDay = day === 0 || day === 1; // Sunday or Monday
+      const isOmerDay = day === 4;               // Thursday
       const isSleeping = hour >= 1 && hour < 13;
 
       if (isVogelDay) {
         videoSource.src = "vogel1.mp4";
-        loopVideo.classList.remove("omerVideo");
         loopVideo.load();
         loopVideo.classList.remove('hidden');
         eye.classList.add('hidden');
       } else if (isOmerDay) {
         videoSource.src = "omer2.mp4";
-        loopVideo.classList.add("omerVideo");
         loopVideo.load();
         loopVideo.classList.remove('hidden');
         eye.classList.add('hidden');
@@ -287,10 +299,12 @@
         function blink() {
           upperLid.classList.add('blinkUp');
           lowerLid.classList.add('blinkDown');
+
           setTimeout(() => {
             upperLid.classList.remove('blinkUp');
             lowerLid.classList.remove('blinkDown');
           }, 500);
+
           const next = 5000 + Math.random() * 5000;
           setTimeout(blink, next);
         }
@@ -320,7 +334,6 @@
         scheduleNextHeart();
       }
 
-      // Auto-refresh handling
       function scheduleTargetRefresh() {
         const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
         const next13 = new Date(now); next13.setHours(13, 1, 0, 0);
