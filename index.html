@@ -212,9 +212,9 @@
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
 
-  <!-- Infinite loop video for Sunday/Monday -->
+  <!-- Loop video container -->
   <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline>
-    <source src="vogel1.mp4" type="video/mp4">
+    <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 
@@ -227,17 +227,26 @@
       const sleepLid = document.getElementById('sleepEyelid');
       const heart = document.getElementById('heart');
       const loopVideo = document.getElementById('loopVideo');
+      const videoSource = document.getElementById('videoSource');
 
       const now = new Date();
-      const day = now.getDay(); // 0 = Sunday, 1 = Monday
+      const day = now.getDay(); // 0 = Sunday
       const hour = now.getHours();
 
-      const isVideoDay = day === 0 || day === 1;
+      const isVogelDay = day === 0 || day === 1; // Sunday or Monday
+      const isOmerDay = day === 4;               // Thursday
       const isSleeping = hour >= 1 && hour < 13;
 
-      if (isVideoDay) {
-        eye.classList.add('hidden');
+      if (isVogelDay) {
+        videoSource.src = "vogel1.mp4";
+        loopVideo.load();
         loopVideo.classList.remove('hidden');
+        eye.classList.add('hidden');
+      } else if (isOmerDay) {
+        videoSource.src = "omer1.mp4";
+        loopVideo.load();
+        loopVideo.classList.remove('hidden');
+        eye.classList.add('hidden');
       } else if (isSleeping) {
         eye.classList.add('hidden');
         sleepLid.classList.remove('hidden');
@@ -340,4 +349,3 @@
   </script>
 </body>
 </html>
-
