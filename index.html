@@ -179,7 +179,7 @@
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
 
-  <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline preload="auto">
+  <video id="loopVideo" class="loopVideo hidden" muted autoplay playsinline preload="auto">
     <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
@@ -205,6 +205,11 @@
 
       if (isVogelDay || isOmerDay) {
         videoSource.src = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
+
+        // Ensure autoplay and looping
+        loopVideo.muted = true;
+        loopVideo.autoplay = true;
+        loopVideo.loop = true;
         loopVideo.load();
 
         loopVideo.oncanplaythrough = () => {
@@ -213,7 +218,7 @@
           });
         };
 
-        // ✅ Force loop in case native loop fails (e.g., Safari)
+        // Extra loop fallback
         loopVideo.addEventListener('ended', () => {
           loopVideo.currentTime = 0;
           loopVideo.play();
