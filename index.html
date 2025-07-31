@@ -29,6 +29,7 @@
       transform: translate(-50%, -50%) rotate(180deg);
       object-fit: cover;
       z-index: 0;
+      background-color: black;
     }
 
     #eye {
@@ -115,12 +116,8 @@
     }
 
     @keyframes floatSleep {
-      0%, 100% {
-        transform: translate(-50%, -35%);
-      }
-      50% {
-        transform: translate(-50%, -65%);
-      }
+      0%, 100% { transform: translate(-50%, -35%); }
+      50% { transform: translate(-50%, -65%); }
     }
 
     .bubble {
@@ -179,7 +176,7 @@
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
 
-  <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline preload="auto">
+  <video id="loopVideo" class="loopVideo hidden" muted autoplay playsinline preload="auto">
     <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
@@ -196,28 +193,34 @@
       const videoSource = document.getElementById('videoSource');
 
       const now = new Date();
-      const day = now.getDay(); // 0 = Sunday
+      const day = now.getDay();
       const hour = now.getHours();
 
-      const isVogelDay = day === 0 || day === 1; // Sunday or Monday
-      const isOmerDay = day === 4;               // Thursday
+      const isVogelDay = day === 0 || day === 1;
+      const isOmerDay = day === 4;
       const isSleeping = hour >= 1 && hour < 13;
 
       if (isVogelDay || isOmerDay) {
         videoSource.src = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
         loopVideo.load();
 
-        loopVideo.oncanplaythrough = () => {
-          loopVideo.play().catch(e => {
-            console.warn("Autoplay failed:", e);
-          });
-        };
+        setTimeout(() => {
+          loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
+        }, 500);
 
-        // ✅ Force loop in case native loop fails (e.g., Safari)
         loopVideo.addEventListener('ended', () => {
-          loopVideo.currentTime = 0;
-          loopVideo.play();
+          setTimeout(() => {
+            loopVideo.currentTime = 0;
+            loopVideo.play().catch(console.warn);
+          }, 200);
         });
+
+        setInterval(() => {
+          if (loopVideo.ended || loopVideo.currentTime >= loopVideo.duration - 0.2) {
+            loopVideo.currentTime = 0;
+            loopVideo.play().catch(console.warn);
+          }
+        }, 1000);
 
         loopVideo.classList.remove('hidden');
         eye.classList.add('hidden');
