@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta http-equiv="refresh" content="3600" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upside Down Pulsing Heart Eye</title>
   <style>
     html, body {
@@ -23,7 +23,8 @@
       height: 100%;
     }
 
-    video.loopVideo {
+    video.loopVideo,
+    img.loopGif {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -172,18 +173,14 @@
     <div id="bubble3" class="bubble"></div>
     <div id="heart">❤️</div>
 
-    <video
-      id="loopVideo"
-      class="loopVideo hidden"
-      autoplay
-      loop
-      muted
-      playsinline
-      preload="auto"
-    >
-      <source id="videoSource" src="" type="video/mp4">
+    <!-- Looping video for Vogel -->
+    <video id="loopVideo" class="loopVideo hidden" autoplay loop muted playsinline preload="auto">
+      <source id="videoSource" src="" type="video/mp4" />
       Your browser does not support the video tag.
     </video>
+
+    <!-- Looping GIF for Omer -->
+    <img id="omerGif" class="loopGif hidden" src="/mnt/data/omer2-ezgif.com-video-to-gif-converter.gif" alt="Omer GIF" />
   </div>
 
   <script>
@@ -194,113 +191,3 @@
       const lowerLid = document.getElementById('lowerEyelid');
       const sleepLid = document.getElementById('sleepEyelid');
       const heart = document.getElementById('heart');
-      const loopVideo = document.getElementById('loopVideo');
-      const videoSource = document.getElementById('videoSource');
-
-      const now = new Date();
-      const day = now.getDay();
-      const hour = now.getHours();
-
-      const isVogelDay = day === 0 || day === 1;
-      const isOmerDay = day === 4;
-      const isSleeping = hour >= 1 && hour < 13;
-
-      if (isVogelDay || isOmerDay) {
-        const filename = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
-        videoSource.src = `${filename}?t=${Date.now()}`;
-
-        loopVideo.addEventListener("canplay", () => {
-          loopVideo.play().catch(console.warn);
-        });
-
-        loopVideo.addEventListener("playing", () => {
-          loopVideo.style.visibility = 'visible';
-        });
-
-        loopVideo.classList.remove('hidden');
-        eye.classList.add('hidden');
-      } else if (isSleeping) {
-        eye.classList.add('hidden');
-        sleepLid.classList.remove('hidden');
-        document.body.classList.add('showBubbles');
-      } else {
-        startEyeBehavior();
-      }
-
-      function startEyeBehavior() {
-        eye.classList.remove('hidden');
-        const positions = [
-          { x: 0.05, y: 0.05 },
-          { x: 0.75, y: 0.2 },
-          { x: 0.6, y: 0.6 },
-          { x: 0.3, y: 0.7 },
-          { x: 0.45, y: 0.45 },
-        ];
-        const STEP = 8000;
-        const CYCLE = positions.length * STEP;
-
-        function moveTo(p) {
-          const eyeW = eye.offsetWidth;
-          const eyeH = eye.offsetHeight;
-          const maxX = window.innerWidth - eyeW;
-          const maxY = window.innerHeight - eyeH;
-
-          const tx = Math.max(0, Math.min(p.x * window.innerWidth, maxX));
-          const ty = Math.max(0, Math.min(p.y * window.innerHeight, maxY));
-
-          eye.style.left = tx + 'px';
-          eye.style.top = ty + 'px';
-
-          pupil.style.left = p.x > 0.5 ? '80%' : '20%';
-          pupil.style.top = p.y > 0.5 ? '80%' : '20%';
-
-          setTimeout(() => {
-            pupil.style.left = '50%';
-            pupil.style.top = '50%';
-          }, 3000);
-        }
-
-        function tick() {
-          const now = Date.now() % CYCLE;
-          const idx = Math.floor(now / STEP);
-          moveTo(positions[idx]);
-          setTimeout(tick, STEP - (now % STEP));
-        }
-
-        function blink() {
-          upperLid.classList.add('blinkUp');
-          lowerLid.classList.add('blinkDown');
-          setTimeout(() => {
-            upperLid.classList.remove('blinkUp');
-            lowerLid.classList.remove('blinkDown');
-          }, 500);
-          setTimeout(blink, 5000 + Math.random() * 5000);
-        }
-
-        function showHeartTemporarily() {
-          const eyeBox = eye.getBoundingClientRect();
-          heart.style.left = eyeBox.left + 'px';
-          heart.style.top = eyeBox.top + 'px';
-          heart.style.display = 'block';
-          eye.style.visibility = 'hidden';
-          setTimeout(() => {
-            heart.style.display = 'none';
-            eye.style.visibility = 'visible';
-            scheduleNextHeart();
-          }, 2000);
-        }
-
-        function scheduleNextHeart() {
-          setTimeout(showHeartTemporarily, 10000 + Math.random() * 20000);
-        }
-
-        tick();
-        blink();
-        scheduleNextHeart();
-      }
-
-      setInterval(() => window.location.reload(), 3600 * 1000);
-    })();
-  </script>
-</body>
-</html>
