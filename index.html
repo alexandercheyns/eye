@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="3600">
+  <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upside Down Pulsing Heart Eye</title>
   <style>
@@ -201,11 +201,11 @@
         videoSource.src = `${filename}?t=${Date.now()}`;
         loopVideo.muted = true;
         loopVideo.autoplay = true;
-        loopVideo.loop = false;
+        loopVideo.loop = true; // ✅ loop enabled here
         loopVideo.load();
 
         loopVideo.oncanplaythrough = () => {
-          loopVideo.play().catch(console.warn);
+          loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
 
           loopVideo.style.visibility = 'hidden';
           loopVideo.onplay = () => {
@@ -217,22 +217,6 @@
               }
             });
           };
-
-          if ('requestVideoFrameCallback' in loopVideo) {
-            function checkLoop() {
-              if (loopVideo.duration - loopVideo.currentTime < 0.05) {
-                loopVideo.currentTime = 0.01;
-              }
-              loopVideo.requestVideoFrameCallback(checkLoop);
-            }
-            loopVideo.requestVideoFrameCallback(checkLoop);
-          } else {
-            loopVideo.addEventListener('timeupdate', () => {
-              if (loopVideo.duration - loopVideo.currentTime < 0.1) {
-                loopVideo.currentTime = 0.01;
-              }
-            });
-          }
         };
 
         loopVideo.classList.remove('hidden');
