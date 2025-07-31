@@ -16,9 +16,7 @@
       transform: rotate(180deg);
     }
 
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
 
     video.loopVideo {
       position: fixed;
@@ -75,13 +73,8 @@
       pointer-events: none;
     }
 
-    #upperEyelid {
-      top: -50%;
-    }
-
-    #lowerEyelid {
-      bottom: -50%;
-    }
+    #upperEyelid { top: -50%; }
+    #lowerEyelid { bottom: -50%; }
 
     @keyframes blinkUpper {
       0%, 100% { top: -50%; }
@@ -93,13 +86,8 @@
       50% { bottom: 0; }
     }
 
-    .blinkUp {
-      animation: blinkUpper 0.5s ease-in-out;
-    }
-
-    .blinkDown {
-      animation: blinkLower 0.5s ease-in-out;
-    }
+    .blinkUp { animation: blinkUpper 0.5s ease-in-out; }
+    .blinkDown { animation: blinkLower 0.5s ease-in-out; }
 
     .sleepLid {
       position: fixed;
@@ -115,12 +103,8 @@
     }
 
     @keyframes floatSleep {
-      0%, 100% {
-        transform: translate(-50%, -35%);
-      }
-      50% {
-        transform: translate(-50%, -65%);
-      }
+      0%, 100% { transform: translate(-50%, -35%); }
+      50% { transform: translate(-50%, -65%); }
     }
 
     .bubble {
@@ -132,9 +116,7 @@
       z-index: 5;
     }
 
-    .showBubbles .bubble {
-      display: block;
-    }
+    .showBubbles .bubble { display: block; }
 
     #bubble1 { width: 40px; height: 40px; left: 85%; top: 10%; animation-delay: 0s; }
     #bubble2 { width: 30px; height: 30px; left: 88%; top: 16%; animation-delay: 1.5s; }
@@ -179,7 +161,7 @@
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
 
-  <video id="loopVideo" class="loopVideo hidden" muted autoplay playsinline preload="auto">
+  <video id="loopVideo" class="loopVideo hidden" playsinline preload="auto">
     <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
@@ -196,32 +178,32 @@
       const videoSource = document.getElementById('videoSource');
 
       const now = new Date();
-      const day = now.getDay(); // 0 = Sunday
+      const day = now.getDay();
       const hour = now.getHours();
 
-      const isVogelDay = day === 0 || day === 1; // Sunday or Monday
-      const isOmerDay = day === 4;               // Thursday
+      const isVogelDay = day === 0 || day === 1;
+      const isOmerDay = day === 4;
       const isSleeping = hour >= 1 && hour < 13;
 
       if (isVogelDay || isOmerDay) {
-        videoSource.src = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
+        const filename = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
+        videoSource.src = `${filename}?t=${Date.now()}`;
 
-        // Ensure autoplay and looping
         loopVideo.muted = true;
         loopVideo.autoplay = true;
-        loopVideo.loop = true;
+        loopVideo.loop = false;
+        loopVideo.playsInline = true;
+
         loopVideo.load();
 
         loopVideo.oncanplaythrough = () => {
-          loopVideo.play().catch(e => {
-            console.warn("Autoplay failed:", e);
-          });
+          loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
         };
 
-        // Extra loop fallback
         loopVideo.addEventListener('ended', () => {
           loopVideo.currentTime = 0;
-          loopVideo.play();
+          loopVideo.load();
+          loopVideo.play().catch(e => console.warn("Loop failed:", e));
         });
 
         loopVideo.classList.remove('hidden');
@@ -315,11 +297,16 @@
         if (next01 <= now) next01.setDate(next01.getDate() + 1);
         if (next13 <= now) next13.setDate(next13.getDate() + 1);
         const nextTarget = next01 < next13 ? next01 : next13;
-        setTimeout(() => location.reload(), nextTarget - now);
+        setTimeout(() => {
+          window.location.href = window.location.href;
+        }, nextTarget - now);
       }
 
       scheduleTargetRefresh();
-      setInterval(() => location.reload(), 3600 * 1000);
+
+      setInterval(() => {
+        window.location.href = window.location.href;
+      }, 3600 * 1000);
     })();
   </script>
 </body>
