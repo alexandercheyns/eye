@@ -33,6 +33,7 @@
       object-fit: cover;
       z-index: 0;
       visibility: hidden;
+      background: black;
     }
 
     #eye {
@@ -171,7 +172,15 @@
     <div id="bubble3" class="bubble"></div>
     <div id="heart">❤️</div>
 
-    <video id="loopVideo" class="loopVideo hidden" playsinline preload="auto">
+    <video
+      id="loopVideo"
+      class="loopVideo hidden"
+      autoplay
+      loop
+      muted
+      playsinline
+      preload="auto"
+    >
       <source id="videoSource" src="" type="video/mp4">
       Your browser does not support the video tag.
     </video>
@@ -199,25 +208,14 @@
       if (isVogelDay || isOmerDay) {
         const filename = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
         videoSource.src = `${filename}?t=${Date.now()}`;
-        loopVideo.muted = true;
-        loopVideo.autoplay = true;
-        loopVideo.loop = true; // ✅ loop enabled here
-        loopVideo.load();
 
-        loopVideo.oncanplaythrough = () => {
-          loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
+        loopVideo.addEventListener("canplay", () => {
+          loopVideo.play().catch(console.warn);
+        });
 
-          loopVideo.style.visibility = 'hidden';
-          loopVideo.onplay = () => {
-            requestAnimationFrame(function waitUntilPlaying() {
-              if (loopVideo.currentTime > 0) {
-                loopVideo.style.visibility = 'visible';
-              } else {
-                requestAnimationFrame(waitUntilPlaying);
-              }
-            });
-          };
-        };
+        loopVideo.addEventListener("playing", () => {
+          loopVideo.style.visibility = 'visible';
+        });
 
         loopVideo.classList.remove('hidden');
         eye.classList.add('hidden');
