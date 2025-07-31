@@ -136,43 +136,14 @@
       display: block;
     }
 
-    #bubble1 {
-      width: 40px;
-      height: 40px;
-      left: 85%;
-      top: 10%;
-      animation-delay: 0s;
-    }
-
-    #bubble2 {
-      width: 30px;
-      height: 30px;
-      left: 88%;
-      top: 16%;
-      animation-delay: 1.5s;
-    }
-
-    #bubble3 {
-      width: 20px;
-      height: 20px;
-      left: 91%;
-      top: 22%;
-      animation-delay: 3s;
-    }
+    #bubble1 { width: 40px; height: 40px; left: 85%; top: 10%; animation-delay: 0s; }
+    #bubble2 { width: 30px; height: 30px; left: 88%; top: 16%; animation-delay: 1.5s; }
+    #bubble3 { width: 20px; height: 20px; left: 91%; top: 22%; animation-delay: 3s; }
 
     @keyframes bubbleUp {
-      0% {
-        transform: translateY(0);
-        opacity: 0.2;
-      }
-      50% {
-        transform: translateY(-20px);
-        opacity: 0.4;
-      }
-      100% {
-        transform: translateY(-60px);
-        opacity: 0;
-      }
+      0% { transform: translateY(0); opacity: 0.2; }
+      50% { transform: translateY(-20px); opacity: 0.4; }
+      100% { transform: translateY(-60px); opacity: 0; }
     }
 
     #heart {
@@ -190,12 +161,8 @@
     }
 
     @keyframes pulse {
-      0%, 100% {
-        transform: scale(1) rotate(180deg);
-      }
-      50% {
-        transform: scale(1.2) rotate(180deg);
-      }
+      0%, 100% { transform: scale(1) rotate(180deg); }
+      50% { transform: scale(1.2) rotate(180deg); }
     }
   </style>
 </head>
@@ -212,8 +179,7 @@
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
 
-  <!-- Loop video container -->
-  <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline>
+  <video id="loopVideo" class="loopVideo hidden" muted loop autoplay playsinline preload="auto">
     <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
@@ -230,21 +196,21 @@
       const videoSource = document.getElementById('videoSource');
 
       const now = new Date();
-      const day = now.getDay(); // 0 = Sunday
+      const day = now.getDay();
       const hour = now.getHours();
 
-      const isVogelDay = day === 0 || day === 1; // Sunday or Monday
-      const isOmerDay = day === 4;               // Thursday
+      const isVogelDay = day === 0 || day === 1;
+      const isOmerDay = day === 4;
       const isSleeping = hour >= 1 && hour < 13;
 
-      if (isVogelDay) {
-        videoSource.src = "vogel1.mp4";
+      if (isVogelDay || isOmerDay) {
+        videoSource.src = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
         loopVideo.load();
-        loopVideo.classList.remove('hidden');
-        eye.classList.add('hidden');
-      } else if (isOmerDay) {
-        videoSource.src = "omer2.mp4";
-        loopVideo.load();
+        loopVideo.oncanplaythrough = () => {
+          loopVideo.play().catch(e => {
+            console.warn("Autoplay failed:", e);
+          });
+        };
         loopVideo.classList.remove('hidden');
         eye.classList.add('hidden');
       } else if (isSleeping) {
@@ -299,14 +265,11 @@
         function blink() {
           upperLid.classList.add('blinkUp');
           lowerLid.classList.add('blinkDown');
-
           setTimeout(() => {
             upperLid.classList.remove('blinkUp');
             lowerLid.classList.remove('blinkDown');
           }, 500);
-
-          const next = 5000 + Math.random() * 5000;
-          setTimeout(blink, next);
+          setTimeout(blink, 5000 + Math.random() * 5000);
         }
 
         function showHeartTemporarily() {
@@ -316,7 +279,6 @@
           heart.style.top = eyeBox.top + 'px';
           heart.style.display = 'block';
           eye.style.visibility = 'hidden';
-
           setTimeout(() => {
             heart.style.display = 'none';
             eye.style.visibility = 'visible';
@@ -349,3 +311,4 @@
   </script>
 </body>
 </html>
+
