@@ -1,6 +1,7 @@
 // server.js
 const WebSocket = require('ws');
 const PORT = 8080;
+videoSource.src = isVogelDay ? "vogel1.mp4" : "omer2_fixed.mp4";
 
 const wss = new WebSocket.Server({ port: PORT });
 console.log(`🧠 WebSocket server running on ws://localhost:${PORT}`);
@@ -11,6 +12,8 @@ wss.on('connection', (ws) => {
     wss.clients.forEach(client => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         client.send(message);
+
+        
       }
     });
   });
