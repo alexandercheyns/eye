@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="3600" />
+  <meta http-equiv="refresh" content="3600">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upside Down Pulsing Heart Eye</title>
   <style>
@@ -13,10 +13,15 @@
       height: 100%;
       background: #000;
       overflow: hidden;
-      transform: rotate(180deg);
     }
 
     .hidden { display: none; }
+
+    .rotated {
+      transform: rotate(180deg);
+      width: 100%;
+      height: 100%;
+    }
 
     video.loopVideo {
       position: fixed;
@@ -27,7 +32,7 @@
       transform: translate(-50%, -50%) rotate(180deg);
       object-fit: cover;
       z-index: 0;
-      visibility: hidden; /* Hide until ready */
+      visibility: hidden;
     }
 
     #eye {
@@ -39,6 +44,9 @@
       overflow: hidden;
       transition: left 3s ease-in-out, top 3s ease-in-out;
       z-index: 1;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
 
     #pupil {
@@ -150,22 +158,24 @@
   </style>
 </head>
 <body>
-  <div id="eye">
-    <div id="pupil"></div>
-    <div id="upperEyelid" class="eyelid"></div>
-    <div id="lowerEyelid" class="eyelid"></div>
+  <div class="rotated">
+    <div id="eye">
+      <div id="pupil"></div>
+      <div id="upperEyelid" class="eyelid"></div>
+      <div id="lowerEyelid" class="eyelid"></div>
+    </div>
+
+    <div id="sleepEyelid" class="hidden sleepLid"></div>
+    <div id="bubble1" class="bubble"></div>
+    <div id="bubble2" class="bubble"></div>
+    <div id="bubble3" class="bubble"></div>
+    <div id="heart">❤️</div>
+
+    <video id="loopVideo" class="loopVideo hidden" playsinline preload="auto">
+      <source id="videoSource" src="" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
   </div>
-
-  <div id="sleepEyelid" class="hidden"></div>
-  <div id="bubble1" class="bubble"></div>
-  <div id="bubble2" class="bubble"></div>
-  <div id="bubble3" class="bubble"></div>
-  <div id="heart">❤️</div>
-
-  <video id="loopVideo" class="loopVideo hidden" playsinline preload="auto">
-    <source id="videoSource" src="" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
 
   <script>
     (function () {
@@ -191,34 +201,30 @@
         videoSource.src = `${filename}?t=${Date.now()}`;
         loopVideo.muted = true;
         loopVideo.autoplay = true;
-        loopVideo.playsInline = true;
         loopVideo.loop = false;
         loopVideo.load();
 
         loopVideo.oncanplaythrough = () => {
-          loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
+          loopVideo.play().catch(console.warn);
 
           loopVideo.style.visibility = 'hidden';
           loopVideo.onplay = () => {
-            const waitUntilPlaying = () => {
+            requestAnimationFrame(function waitUntilPlaying() {
               if (loopVideo.currentTime > 0) {
                 loopVideo.style.visibility = 'visible';
               } else {
                 requestAnimationFrame(waitUntilPlaying);
               }
-            };
-            requestAnimationFrame(waitUntilPlaying);
+            });
           };
 
-          const duration = loopVideo.duration;
-
           if ('requestVideoFrameCallback' in loopVideo) {
-            const checkLoop = () => {
+            function checkLoop() {
               if (loopVideo.duration - loopVideo.currentTime < 0.05) {
                 loopVideo.currentTime = 0.01;
               }
               loopVideo.requestVideoFrameCallback(checkLoop);
-            };
+            }
             loopVideo.requestVideoFrameCallback(checkLoop);
           } else {
             loopVideo.addEventListener('timeupdate', () => {
@@ -234,7 +240,6 @@
       } else if (isSleeping) {
         eye.classList.add('hidden');
         sleepLid.classList.remove('hidden');
-        sleepLid.classList.add('sleepLid');
         document.body.classList.add('showBubbles');
       } else {
         startEyeBehavior();
@@ -291,7 +296,6 @@
         }
 
         function showHeartTemporarily() {
-          const heartDuration = 2000;
           const eyeBox = eye.getBoundingClientRect();
           heart.style.left = eyeBox.left + 'px';
           heart.style.top = eyeBox.top + 'px';
@@ -301,12 +305,11 @@
             heart.style.display = 'none';
             eye.style.visibility = 'visible';
             scheduleNextHeart();
-          }, heartDuration);
+          }, 2000);
         }
 
         function scheduleNextHeart() {
-          const nextDelay = 10000 + Math.random() * 20000;
-          setTimeout(showHeartTemporarily, nextDelay);
+          setTimeout(showHeartTemporarily, 10000 + Math.random() * 20000);
         }
 
         tick();
@@ -314,17 +317,7 @@
         scheduleNextHeart();
       }
 
-      function scheduleTargetRefresh() {
-        const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
-        const next13 = new Date(now); next13.setHours(13, 1, 0, 0);
-        if (next01 <= now) next01.setDate(next01.getDate() + 1);
-        if (next13 <= now) next13.setDate(next13.getDate() + 1);
-        const nextTarget = next01 < next13 ? next01 : next13;
-        setTimeout(() => window.location.href = window.location.href, nextTarget - now);
-      }
-
-      scheduleTargetRefresh();
-      setInterval(() => window.location.href = window.location.href, 3600 * 1000);
+      setInterval(() => window.location.reload(), 3600 * 1000);
     })();
   </script>
 </body>
