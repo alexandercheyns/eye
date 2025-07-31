@@ -20,7 +20,8 @@
       display: none;
     }
 
-    video.loopVideo {
+    video.loopVideo,
+    img.loopVideo {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -201,28 +202,35 @@
       const isSleeping = hour >= 1 && hour < 13;
 
       if (isVogelDay || isOmerDay) {
-        videoSource.src = isVogelDay ? "vogel1.mp4" : "omer2.mp4";
-        loopVideo.load();
-
-        setTimeout(() => {
-          loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
-        }, 500);
-
-        loopVideo.addEventListener('ended', () => {
+        if (isOmerDay) {
+          const gif = document.createElement('img');
+          gif.src = "omer1.gif";
+          gif.classList.add('loopVideo');
+          document.body.appendChild(gif);
+        } else {
+          videoSource.src = "vogel1.mp4";
+          loopVideo.load();
           setTimeout(() => {
-            loopVideo.currentTime = 0;
-            loopVideo.play().catch(console.warn);
-          }, 200);
-        });
+            loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
+          }, 500);
 
-        setInterval(() => {
-          if (loopVideo.ended || loopVideo.currentTime >= loopVideo.duration - 0.2) {
-            loopVideo.currentTime = 0;
-            loopVideo.play().catch(console.warn);
-          }
-        }, 1000);
+          loopVideo.addEventListener('ended', () => {
+            setTimeout(() => {
+              loopVideo.currentTime = 0;
+              loopVideo.play().catch(console.warn);
+            }, 200);
+          });
 
-        loopVideo.classList.remove('hidden');
+          setInterval(() => {
+            if (loopVideo.ended || loopVideo.currentTime >= loopVideo.duration - 0.2) {
+              loopVideo.currentTime = 0;
+              loopVideo.play().catch(console.warn);
+            }
+          }, 1000);
+
+          loopVideo.classList.remove('hidden');
+        }
+
         eye.classList.add('hidden');
       } else if (isSleeping) {
         eye.classList.add('hidden');
