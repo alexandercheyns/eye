@@ -285,7 +285,11 @@
             lowerLid.classList.remove('blinkDown');
           }, 500);
           if (!fromSocket) broadcast({ type: 'blink' });
-          setTimeout(() => blink(), 5000 + Math.random() * 5000);
+        }
+
+        function blinkLoop() {
+          blink();
+          setTimeout(blinkLoop, 5000 + Math.random() * 5000);
         }
 
         function showHeartTemporarily() {
@@ -318,7 +322,7 @@
         };
 
         tick();
-        blink();
+        blinkLoop();
         scheduleNextHeart();
       }
 
