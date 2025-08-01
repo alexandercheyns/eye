@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upside Down Pulsing Heart Eye</title>
+  <title>Synced Eye</title>
   <style>
     html, body {
       margin: 0;
@@ -169,18 +169,15 @@
     <div id="upperEyelid" class="eyelid"></div>
     <div id="lowerEyelid" class="eyelid"></div>
   </div>
-
   <div id="sleepEyelid" class="hidden"></div>
   <div id="bubble1" class="bubble"></div>
   <div id="bubble2" class="bubble"></div>
   <div id="bubble3" class="bubble"></div>
   <div id="heart">❤️</div>
-
   <video id="loopVideo" class="loopVideo hidden" muted autoplay playsinline preload="auto">
     <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-
   <script>
     (function () {
       const eye = document.getElementById('eye');
@@ -200,6 +197,13 @@
       const isOmerDay = day === 4;
       const isSleeping = hour >= 1 && hour < 13;
 
+      const socket = new WebSocket('ws://localhost:8080');
+      function broadcast(event) {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify(event));
+        }
+      }
+
       if (isVogelDay || isOmerDay) {
         if (isOmerDay) {
           const gif = document.createElement('img');
@@ -212,24 +216,20 @@
           setTimeout(() => {
             loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
           }, 500);
-
           loopVideo.addEventListener('ended', () => {
             setTimeout(() => {
               loopVideo.currentTime = 0;
               loopVideo.play().catch(console.warn);
             }, 200);
           });
-
           setInterval(() => {
             if (loopVideo.ended || loopVideo.currentTime >= loopVideo.duration - 0.2) {
               loopVideo.currentTime = 0;
               loopVideo.play().catch(console.warn);
             }
           }, 1000);
-
           loopVideo.classList.remove('hidden');
         }
-
         eye.classList.add('hidden');
       } else if (isSleeping) {
         eye.classList.add('hidden');
@@ -252,25 +252,22 @@
         const STEP = 8000;
         const CYCLE = positions.length * STEP;
 
-        function moveTo(p) {
+        function moveTo(p, fromSocket = false) {
           const eyeW = eye.offsetWidth;
           const eyeH = eye.offsetHeight;
           const maxX = window.innerWidth - eyeW;
           const maxY = window.innerHeight - eyeH;
-
           const tx = Math.max(0, Math.min(p.x * window.innerWidth, maxX));
           const ty = Math.max(0, Math.min(p.y * window.innerHeight, maxY));
-
           eye.style.left = tx + 'px';
           eye.style.top = ty + 'px';
-
           pupil.style.left = p.x > 0.5 ? '80%' : '20%';
           pupil.style.top = p.y > 0.5 ? '80%' : '20%';
-
           setTimeout(() => {
             pupil.style.left = '50%';
             pupil.style.top = '50%';
           }, 3000);
+          if (!fromSocket) broadcast({ type: 'move', position: p });
         }
 
         function tick() {
@@ -280,14 +277,15 @@
           setTimeout(tick, STEP - (now % STEP));
         }
 
-        function blink() {
+        function blink(fromSocket = false) {
           upperLid.classList.add('blinkUp');
           lowerLid.classList.add('blinkDown');
           setTimeout(() => {
             upperLid.classList.remove('blinkUp');
             lowerLid.classList.remove('blinkDown');
           }, 500);
-          setTimeout(blink, 5000 + Math.random() * 5000);
+          if (!fromSocket) broadcast({ type: 'blink' });
+          setTimeout(() => blink(), 5000 + Math.random() * 5000);
         }
 
         function showHeartTemporarily() {
@@ -308,6 +306,16 @@
           const nextDelay = 10000 + Math.random() * 20000;
           setTimeout(showHeartTemporarily, nextDelay);
         }
+
+        socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'move') moveTo(data.position, true);
+            else if (data.type === 'blink') blink(true);
+          } catch (e) {
+            console.warn('Invalid socket message:', event.data);
+          }
+        };
 
         tick();
         blink();
