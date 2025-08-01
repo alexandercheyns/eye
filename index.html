@@ -193,8 +193,7 @@
       const day = now.getDay();
       const hour = now.getHours();
 
-      const isVogelDay = day === 0 || day === 1;
-      const isOmerDay = day === 4;
+      const isGifDay = day === 0 || day === 1 || day === 4;
       const isSleeping = hour >= 1 && hour < 13;
 
       const socket = new WebSocket('ws://localhost:8080');
@@ -204,32 +203,11 @@
         }
       }
 
-      if (isVogelDay || isOmerDay) {
-        if (isOmerDay) {
-          const gif = document.createElement('img');
-          gif.src = "omer1.gif";
-          gif.classList.add('loopVideo');
-          document.body.appendChild(gif);
-        } else {
-          videoSource.src = "vogel1.mp4";
-          loopVideo.load();
-          setTimeout(() => {
-            loopVideo.play().catch(e => console.warn("Autoplay failed:", e));
-          }, 500);
-          loopVideo.addEventListener('ended', () => {
-            setTimeout(() => {
-              loopVideo.currentTime = 0;
-              loopVideo.play().catch(console.warn);
-            }, 200);
-          });
-          setInterval(() => {
-            if (loopVideo.ended || loopVideo.currentTime >= loopVideo.duration - 0.2) {
-              loopVideo.currentTime = 0;
-              loopVideo.play().catch(console.warn);
-            }
-          }, 1000);
-          loopVideo.classList.remove('hidden');
-        }
+      if (isGifDay) {
+        const gif = document.createElement('img');
+        gif.src = "omer1.gif";
+        gif.classList.add('loopVideo');
+        document.body.appendChild(gif);
         eye.classList.add('hidden');
       } else if (isSleeping) {
         eye.classList.add('hidden');
