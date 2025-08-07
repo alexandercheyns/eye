@@ -193,7 +193,7 @@
       const day = now.getDay();
       const hour = now.getHours();
 
-      const isGifDay = day === 0 || day === 1 || day === 4;
+      const isGifDay = day === 0 || day === 1;
       const isSleeping = hour >= 1 && hour < 13;
 
       const socket = new WebSocket('ws://localhost:8080');
