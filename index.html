@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Metal Eye</title>
-  <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap" rel="stylesheet">
+  <title>Synced Eye</title>
   <style>
     html, body {
       margin: 0;
@@ -14,7 +13,6 @@
       height: 100%;
       background: #000;
       overflow: hidden;
-      font-family: 'Metal Mania', cursive;
     }
 
     .hidden {
@@ -38,9 +36,7 @@
       position: fixed;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, #3a3a3a, #111);
-      box-shadow: 0 0 40px crimson, 0 0 80px #ff0000 inset;
-      border: 4px solid #550000;
+      background: #fff;
       border-radius: 50%;
       overflow: hidden;
       transition: left 3s ease-in-out, top 3s ease-in-out;
@@ -51,8 +47,7 @@
       position: absolute;
       width: 300px;
       height: 300px;
-      background: radial-gradient(circle, #000000, #550000);
-      box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000 inset;
+      background: #000;
       border-radius: 50%;
       top: 50%;
       left: 50%;
@@ -65,18 +60,17 @@
       position: absolute;
       width: 80px;
       height: 80px;
-      background: crimson;
+      background: #fff;
       border-radius: 50%;
       top: 40px;
       left: 40px;
-      box-shadow: 0 0 10px #ff0000;
     }
 
     .eyelid {
       position: absolute;
       width: 100%;
       height: 50%;
-      background: #1a0000;
+      background: #000;
       left: 0;
       z-index: 3;
       pointer-events: none;
@@ -92,28 +86,27 @@
 
     @keyframes blinkUpper {
       0%, 100% { top: -50%; }
-      40%, 60% { top: 0; }
+      50% { top: 0; }
     }
 
     @keyframes blinkLower {
       0%, 100% { bottom: -50%; }
-      40%, 60% { bottom: 0; }
+      50% { bottom: 0; }
     }
 
     .blinkUp {
-      animation: blinkUpper 0.4s ease-in-out;
+      animation: blinkUpper 0.5s ease-in-out;
     }
 
     .blinkDown {
-      animation: blinkLower 0.4s ease-in-out;
+      animation: blinkLower 0.5s ease-in-out;
     }
 
     .sleepLid {
       position: fixed;
       width: 600px;
       height: 100px;
-      background: #220000;
-      box-shadow: 0 0 30px #aa0000;
+      background: #555;
       border-radius: 50px;
       left: 50%;
       top: 50%;
@@ -130,8 +123,7 @@
     .bubble {
       position: fixed;
       border-radius: 50%;
-      background: rgba(255, 0, 0, 0.2);
-      box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      background: rgba(255, 255, 255, 0.15);
       animation: bubbleUp 5s linear infinite;
       display: none;
       z-index: 5;
@@ -146,8 +138,8 @@
     #bubble3 { width: 20px; height: 20px; left: 91%; top: 22%; animation-delay: 3s; }
 
     @keyframes bubbleUp {
-      0% { transform: translateY(0); opacity: 0.3; }
-      50% { transform: translateY(-20px); opacity: 0.6; }
+      0% { transform: translateY(0); opacity: 0.2; }
+      50% { transform: translateY(-20px); opacity: 0.4; }
       100% { transform: translateY(-60px); opacity: 0; }
     }
 
@@ -162,8 +154,6 @@
       line-height: 600px;
       width: 600px;
       height: 600px;
-      color: crimson;
-      text-shadow: 0 0 30px red, 0 0 60px darkred;
       transform: rotate(180deg);
     }
 
@@ -183,7 +173,7 @@
   <div id="bubble1" class="bubble"></div>
   <div id="bubble2" class="bubble"></div>
   <div id="bubble3" class="bubble"></div>
-  <div id="heart">🤘</div>
+  <div id="heart">❤️</div>
   <video id="loopVideo" class="loopVideo hidden" muted autoplay playsinline preload="auto">
     <source id="videoSource" src="" type="video/mp4">
     Your browser does not support the video tag.
