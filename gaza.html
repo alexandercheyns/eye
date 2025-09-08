@@ -176,6 +176,12 @@
   }
 
   init();
+
+  // 🔄 Auto-refresh every hour (3600000 ms)
+  setTimeout(() => {
+    window.location.reload();
+  }, 3600000);
+
 })();
 </script>
 </body>
