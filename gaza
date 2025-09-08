@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Children — Names Memorial (Gaza)</title>
+  <style>
+    :root{
+      --bg:#0b0b0c; --fg:#e8e8ea; --muted:#9aa0a6; --accent:#8ab4f8; --accent2:#f28b82;
+    }
+    html,body{height:100%;}
+    body{margin:0;background:linear-gradient(180deg,#0b0b0c 0%,#111215 100%);color:var(--fg);font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";}
+    .wrap{min-height:100%;display:flex;flex-direction:column;}
+    header{padding:24px 20px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;z-index:20;}
+    header .brand{font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;font-size:12px}
+    header .controls{display:flex;gap:10px;align-items:center}
+    header .controls button, header .controls select{background:#1a1c20;border:1px solid #2a2d33;color:var(--fg);border-radius:14px;padding:8px 12px;font-size:14px;cursor:pointer}
+    header .controls button:hover{border-color:#3b3f46}
+
+    main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px;}
+    .quote-container{position:sticky;top:20px;z-index:5;text-align:center;margin-bottom:40px;}
+    .quote{font-weight:800;line-height:1.1;}
+    .q-line{font-size: clamp(36px, 8vw, 120px);opacity:0;transition:opacity 600ms ease;text-transform:uppercase;}
+    .q-line.show{opacity:1;}
+
+    .names-container{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .name{font-size: clamp(44px, 9vw, 112px); font-weight:800; letter-spacing:.01em; text-align:center}
+    .meta{margin-top:10px;font-size:14px;color:var(--muted);text-align:center}
+
+    footer{padding:14px 20px 24px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;z-index:20;}
+    a{color:var(--accent)}
+    .error{color:var(--accent2)}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Children — Names Memorial (Gaza)</div>
+    <div class="controls">
+      <button id="toggle">Pause</button>
+      <label>
+        Speed
+        <select id="speed">
+          <option value="200">0.2s</option>
+          <option value="100">0.1s</option>
+          <option value="300">0.3s</option>
+          <option value="500">0.5s</option>
+          <option value="1000">1s</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <div class="quote-container" aria-live="polite" aria-atomic="true">
+      <div class="quote">
+        <div class="q-line" id="q1">The smallest coffins</div>
+        <div class="q-line" id="q2">are the heaviest</div>
+      </div>
+    </div>
+    <div class="names-container">
+      <div class="name" id="name">&nbsp;</div>
+      <div class="meta" id="meta">Loading names…</div>
+    </div>
+  </main>
+
+  <footer>
+    <div>
+      <span>Source:&nbsp;</span>
+      <a href="https://data.techforpalestine.org/docs/killed-in-gaza/" target="_blank" rel="noopener">Killed in Gaza dataset</a>
+    </div>
+    <div>
+      <span id="counts" class="hidden"></span>
+      <span id="errors" class="error"></span>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const TWO_YEARS_MS = 1000 * 60 * 60 * 24 * 365 * 2;
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - TWO_YEARS_MS);
+
+  const els = {
+    q:[document.getElementById('q1'), document.getElementById('q2')],
+    name: document.getElementById('name'),
+    meta: document.getElementById('meta'),
+    counts: document.getElementById('counts'),
+    errors: document.getElementById('errors'),
+    toggle: document.getElementById('toggle'),
+    speed: document.getElementById('speed')
+  };
+
+  async function showQuote(){
+    for(let i=0;i<els.q.length;i++){
+      await new Promise(r=>setTimeout(r, 600));
+      els.q[i].classList.add('show');
+    }
+    await new Promise(r=>setTimeout(r, 800));
+  }
+
+  const sourceURL = 'https://data.techforpalestine.org/api/v2/killed-in-gaza.min.json';
+
+  function isChild(age){
+    const n = typeof age === 'number' ? age : parseInt(String(age).replace(/[^0-9]/g,''),10);
+    return Number.isFinite(n) && n >= 0 && n < 18 ? n : null;
+  }
+
+  async function fetchGazaChildren(){
+    try{
+      const res = await fetch(sourceURL, {cache:'no-store'});
+      if(!res.ok) throw new Error('Gaza fetch error '+res.status);
+      const data = await res.json();
+      return data
+        .map(d=>{
+          const ageN = isChild(d.age ?? d.Age ?? d.age_years ?? d.age_year ?? d.age_in_years);
+          const name = (d.en_name && d.en_name.trim()) || (d.name && d.name.trim()) || '';
+          return ageN !== null && name ? { name: `${name} (${ageN})`, date: d.date || '2023-10-07..2025', source: 'Gaza' } : null;
+        })
+        .filter(Boolean);
+    }catch(err){
+      noteError('Could not load Gaza dataset: '+err.message);
+      return [];
+    }
+  }
+
+  function noteError(msg){
+    console.error(msg);
+    els.errors.textContent = msg;
+  }
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  let feed = [];
+  let idx = 0;
+  let timer = null;
+
+  function startTicker(){
+    const speed = parseInt(els.speed.value,10);
+    stopTicker();
+    timer = setInterval(()=>{
+      if(feed.length===0){ els.meta.textContent = 'No children found in the last two years.'; return; }
+      const item = feed[idx % feed.length];
+      els.name.textContent = item.name;
+      els.meta.textContent = item.date ? String(item.date) : '';
+      idx++;
+    }, speed);
+  }
+  function stopTicker(){ if(timer){ clearInterval(timer); timer = null; } }
+
+  els.toggle.addEventListener('click', ()=>{
+    if(timer){ stopTicker(); els.toggle.textContent='Resume'; }
+    else { startTicker(); els.toggle.textContent='Pause'; }
+  });
+  els.speed.addEventListener('change', ()=>{ startTicker(); });
+
+  async function init(){
+    await showQuote();
+    els.meta.textContent = 'Fetching names…';
+    const gazaChildren = await fetchGazaChildren();
+
+    feed = shuffle(gazaChildren);
+
+    els.counts.classList.remove('hidden');
+    els.counts.textContent = `Loaded ${feed.length.toLocaleString()} children (Gaza) from the last 2 years`;
+
+    startTicker();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
