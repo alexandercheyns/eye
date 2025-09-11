@@ -9,6 +9,9 @@
       --bg:#0b0b0c; --fg:#e8e8ea; --muted:#9aa0a6; --accent:#8ab4f8; --accent2:#f28b82;
     }
     html,body{height:100%;}
+    /* ⬇️ Added: rotate whole page 180° */
+    html{ transform: rotate(180deg); transform-origin: center center; }
+
     body{margin:0;background:linear-gradient(180deg,#0b0b0c 0%,#111215 100%);color:var(--fg);font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";}
     .wrap{min-height:100%;display:flex;flex-direction:column;}
     header{padding:24px 20px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;z-index:20;}
@@ -134,7 +137,7 @@
   function shuffle(arr){
     for(let i=arr.length-1;i>0;i--){
       const j = Math.floor(Math.random()*(i+1));
-      [arr[i],arr[j]]=[arr[j],arr[i]];
+      [arr[i],arr[j]]=[arr[j],arr[j]=arr[i]];
     }
     return arr;
   }
@@ -177,7 +180,6 @@
 
   init();
 
-  // 🔄 Auto-refresh every hour (3600000 ms)
   setTimeout(() => {
     window.location.reload();
   }, 3600000);
