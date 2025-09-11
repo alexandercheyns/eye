@@ -1,190 +1,321 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Children — Names Memorial (Gaza)</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="3600" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Synced Eye</title>
   <style>
-    :root{
-      --bg:#0b0b0c; --fg:#e8e8ea; --muted:#9aa0a6; --accent:#8ab4f8; --accent2:#f28b82;
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
     }
-    html,body{height:100%;}
-    /* ⬇️ Added: rotate whole page 180° */
-    html{ transform: rotate(180deg); transform-origin: center center; }
 
-    body{margin:0;background:linear-gradient(180deg,#0b0b0c 0%,#111215 100%);color:var(--fg);font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";}
-    .wrap{min-height:100%;display:flex;flex-direction:column;}
-    header{padding:24px 20px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;z-index:20;}
-    header .brand{font-weight:700;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;font-size:12px}
-    header .controls{display:flex;gap:10px;align-items:center}
-    header .controls button, header .controls select{background:#1a1c20;border:1px solid #2a2d33;color:var(--fg);border-radius:14px;padding:8px 12px;font-size:14px;cursor:pointer}
-    header .controls button:hover{border-color:#3b3f46}
+    .hidden {
+      display: none;
+    }
 
-    main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px;}
-    .quote-container{position:sticky;top:20px;z-index:5;text-align:center;margin-bottom:40px;}
-    .quote{font-weight:800;line-height:1.1;}
-    .q-line{font-size: clamp(36px, 8vw, 120px);opacity:0;transition:opacity 600ms ease;text-transform:uppercase;}
-    .q-line.show{opacity:1;}
+    video.loopVideo,
+    img.loopVideo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 100vw;
+      height: 100vh;
+      transform: translate(-50%, -50%) rotate(180deg);
+      object-fit: cover;
+      z-index: 0;
+      background-color: black;
+    }
 
-    .names-container{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-    .name{font-size: clamp(44px, 9vw, 112px); font-weight:800; letter-spacing:.01em; text-align:center}
-    .meta{margin-top:10px;font-size:14px;color:var(--muted);text-align:center}
+    #eye {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: #fff;
+      border-radius: 50%;
+      overflow: hidden;
+      transition: left 3s ease-in-out, top 3s ease-in-out;
+      z-index: 1;
+    }
 
-    footer{padding:14px 20px 24px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;z-index:20;}
-    a{color:var(--accent)}
-    .error{color:var(--accent2)}
-    .hidden{display:none}
+    #pupil {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: #000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 3s ease-in-out, top 3s ease-in-out;
+    }
+
+    #pupil::before {
+      content: '';
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: #fff;
+      border-radius: 50%;
+      top: 40px;
+      left: 40px;
+    }
+
+    .eyelid {
+      position: absolute;
+      width: 100%;
+      height: 50%;
+      background: #000;
+      left: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    #upperEyelid {
+      top: -50%;
+    }
+
+    #lowerEyelid {
+      bottom: -50%;
+    }
+
+    @keyframes blinkUpper {
+      0%, 100% { top: -50%; }
+      50% { top: 0; }
+    }
+
+    @keyframes blinkLower {
+      0%, 100% { bottom: -50%; }
+      50% { bottom: 0; }
+    }
+
+    .blinkUp {
+      animation: blinkUpper 0.5s ease-in-out;
+    }
+
+    .blinkDown {
+      animation: blinkLower 0.5s ease-in-out;
+    }
+
+    .sleepLid {
+      position: fixed;
+      width: 600px;
+      height: 100px;
+      background: #555;
+      border-radius: 50px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      animation: floatSleep 4s ease-in-out infinite;
+    }
+
+    @keyframes floatSleep {
+      0%, 100% { transform: translate(-50%, -35%); }
+      50% { transform: translate(-50%, -65%); }
+    }
+
+    .bubble {
+      position: fixed;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      animation: bubbleUp 5s linear infinite;
+      display: none;
+      z-index: 5;
+    }
+
+    .showBubbles .bubble {
+      display: block;
+    }
+
+    #bubble1 { width: 40px; height: 40px; left: 85%; top: 10%; animation-delay: 0s; }
+    #bubble2 { width: 30px; height: 30px; left: 88%; top: 16%; animation-delay: 1.5s; }
+    #bubble3 { width: 20px; height: 20px; left: 91%; top: 22%; animation-delay: 3s; }
+
+    @keyframes bubbleUp {
+      0% { transform: translateY(0); opacity: 0.2; }
+      50% { transform: translateY(-20px); opacity: 0.4; }
+      100% { transform: translateY(-60px); opacity: 0; }
+    }
+
+    #heart {
+      position: fixed;
+      font-size: 300px;
+      z-index: 10;
+      display: none;
+      pointer-events: none;
+      animation: pulse 1s infinite ease-in-out;
+      text-align: center;
+      line-height: 600px;
+      width: 600px;
+      height: 600px;
+      transform: rotate(180deg);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1) rotate(180deg); }
+      50% { transform: scale(1.2) rotate(180deg); }
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="brand">Children — Names Memorial (Gaza)</div>
-    <div class="controls">
-      <button id="toggle">Pause</button>
-      <label>
-        Speed
-        <select id="speed">
-          <option value="200">0.2s</option>
-          <option value="100">0.1s</option>
-          <option value="300">0.3s</option>
-          <option value="500">0.5s</option>
-          <option value="1000">1s</option>
-        </select>
-      </label>
-    </div>
-  </header>
+  <div id="eye">
+    <div id="pupil"></div>
+    <div id="upperEyelid" class="eyelid"></div>
+    <div id="lowerEyelid" class="eyelid"></div>
+  </div>
+  <div id="sleepEyelid" class="hidden"></div>
+  <div id="bubble1" class="bubble"></div>
+  <div id="bubble2" class="bubble"></div>
+  <div id="bubble3" class="bubble"></div>
+  <div id="heart">❤️</div>
+  <video id="loopVideo" class="loopVideo hidden" muted autoplay playsinline preload="auto">
+    <source id="videoSource" src="" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <script>
+    (function () {
+      const eye = document.getElementById('eye');
+      const pupil = document.getElementById('pupil');
+      const upperLid = document.getElementById('upperEyelid');
+      const lowerLid = document.getElementById('lowerEyelid');
+      const sleepLid = document.getElementById('sleepEyelid');
+      const heart = document.getElementById('heart');
+      const loopVideo = document.getElementById('loopVideo');
+      const videoSource = document.getElementById('videoSource');
 
-  <main>
-    <div class="quote-container" aria-live="polite" aria-atomic="true">
-      <div class="quote">
-        <div class="q-line" id="q1">The smallest coffins</div>
-        <div class="q-line" id="q2">are the heaviest</div>
-      </div>
-    </div>
-    <div class="names-container">
-      <div class="name" id="name">&nbsp;</div>
-      <div class="meta" id="meta">Loading names…</div>
-    </div>
-  </main>
+      const now = new Date();
+      const day = now.getDay();
+      const hour = now.getHours();
 
-  <footer>
-    <div>
-      <span>Source:&nbsp;</span>
-      <a href="https://data.techforpalestine.org/docs/killed-in-gaza/" target="_blank" rel="noopener">Killed in Gaza dataset</a>
-    </div>
-    <div>
-      <span id="counts" class="hidden"></span>
-      <span id="errors" class="error"></span>
-    </div>
-  </footer>
-</div>
+      const isGifDay = day === 0 || day === 1;
+      const isSleeping = hour >= 1 && hour < 13;
 
-<script>
-(function(){
-  const TWO_YEARS_MS = 1000 * 60 * 60 * 24 * 365 * 2;
-  const now = new Date();
-  const cutoff = new Date(now.getTime() - TWO_YEARS_MS);
+      const socket = new WebSocket('ws://localhost:8080');
+      function broadcast(event) {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify(event));
+        }
+      }
 
-  const els = {
-    q:[document.getElementById('q1'), document.getElementById('q2')],
-    name: document.getElementById('name'),
-    meta: document.getElementById('meta'),
-    counts: document.getElementById('counts'),
-    errors: document.getElementById('errors'),
-    toggle: document.getElementById('toggle'),
-    speed: document.getElementById('speed')
-  };
+      if (isGifDay) {
+        const gif = document.createElement('img');
+        gif.src = "omer1.gif";
+        gif.classList.add('loopVideo');
+        document.body.appendChild(gif);
+        eye.classList.add('hidden');
+      } else if (isSleeping) {
+        eye.classList.add('hidden');
+        sleepLid.classList.remove('hidden');
+        sleepLid.classList.add('sleepLid');
+        document.body.classList.add('showBubbles');
+      } else {
+        startEyeBehavior();
+      }
 
-  async function showQuote(){
-    for(let i=0;i<els.q.length;i++){
-      await new Promise(r=>setTimeout(r, 600));
-      els.q[i].classList.add('show');
-    }
-    await new Promise(r=>setTimeout(r, 800));
-  }
+      function startEyeBehavior() {
+        eye.classList.remove('hidden');
+        const positions = [
+          { x: 0.05, y: 0.05 },
+          { x: 0.75, y: 0.2 },
+          { x: 0.6, y: 0.6 },
+          { x: 0.3, y: 0.7 },
+          { x: 0.45, y: 0.45 },
+        ];
+        const STEP = 8000;
+        const CYCLE = positions.length * STEP;
 
-  const sourceURL = 'https://data.techforpalestine.org/api/v2/killed-in-gaza.min.json';
+        function moveTo(p, fromSocket = false) {
+          const eyeW = eye.offsetWidth;
+          const eyeH = eye.offsetHeight;
+          const maxX = window.innerWidth - eyeW;
+          const maxY = window.innerHeight - eyeH;
+          const tx = Math.max(0, Math.min(p.x * window.innerWidth, maxX));
+          const ty = Math.max(0, Math.min(p.y * window.innerHeight, maxY));
+          eye.style.left = tx + 'px';
+          eye.style.top = ty + 'px';
+          pupil.style.left = p.x > 0.5 ? '80%' : '20%';
+          pupil.style.top = p.y > 0.5 ? '80%' : '20%';
+          setTimeout(() => {
+            pupil.style.left = '50%';
+            pupil.style.top = '50%';
+          }, 3000);
+          if (!fromSocket) broadcast({ type: 'move', position: p });
+        }
 
-  function isChild(age){
-    const n = typeof age === 'number' ? age : parseInt(String(age).replace(/[^0-9]/g,''),10);
-    return Number.isFinite(n) && n >= 0 && n < 18 ? n : null;
-  }
+        function tick() {
+          const now = Date.now() % CYCLE;
+          const idx = Math.floor(now / STEP);
+          moveTo(positions[idx]);
+          setTimeout(tick, STEP - (now % STEP));
+        }
 
-  async function fetchGazaChildren(){
-    try{
-      const res = await fetch(sourceURL, {cache:'no-store'});
-      if(!res.ok) throw new Error('Gaza fetch error '+res.status);
-      const data = await res.json();
-      return data
-        .map(d=>{
-          const ageN = isChild(d.age ?? d.Age ?? d.age_years ?? d.age_year ?? d.age_in_years);
-          const name = (d.en_name && d.en_name.trim()) || (d.name && d.name.trim()) || '';
-          return ageN !== null && name ? { name: `${name} (${ageN})`, date: d.date || '2023-10-07..2025', source: 'Gaza' } : null;
-        })
-        .filter(Boolean);
-    }catch(err){
-      noteError('Could not load Gaza dataset: '+err.message);
-      return [];
-    }
-  }
+        function blink(fromSocket = false) {
+          upperLid.classList.add('blinkUp');
+          lowerLid.classList.add('blinkDown');
+          setTimeout(() => {
+            upperLid.classList.remove('blinkUp');
+            lowerLid.classList.remove('blinkDown');
+          }, 500);
+          if (!fromSocket) broadcast({ type: 'blink' });
+        }
 
-  function noteError(msg){
-    console.error(msg);
-    els.errors.textContent = msg;
-  }
+        function blinkLoop() {
+          blink();
+          setTimeout(blinkLoop, 5000 + Math.random() * 5000);
+        }
 
-  function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [arr[i],arr[j]]=[arr[j],arr[j]=arr[i]];
-    }
-    return arr;
-  }
+        function showHeartTemporarily() {
+          const heartDuration = 2000;
+          const eyeBox = eye.getBoundingClientRect();
+          heart.style.left = eyeBox.left + 'px';
+          heart.style.top = eyeBox.top + 'px';
+          heart.style.display = 'block';
+          eye.style.visibility = 'hidden';
+          setTimeout(() => {
+            heart.style.display = 'none';
+            eye.style.visibility = 'visible';
+            scheduleNextHeart();
+          }, heartDuration);
+        }
 
-  let feed = [];
-  let idx = 0;
-  let timer = null;
+        function scheduleNextHeart() {
+          const nextDelay = 10000 + Math.random() * 20000;
+          setTimeout(showHeartTemporarily, nextDelay);
+        }
 
-  function startTicker(){
-    const speed = parseInt(els.speed.value,10);
-    stopTicker();
-    timer = setInterval(()=>{
-      if(feed.length===0){ els.meta.textContent = 'No children found in the last two years.'; return; }
-      const item = feed[idx % feed.length];
-      els.name.textContent = item.name;
-      els.meta.textContent = item.date ? String(item.date) : '';
-      idx++;
-    }, speed);
-  }
-  function stopTicker(){ if(timer){ clearInterval(timer); timer = null; } }
+        socket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'move') moveTo(data.position, true);
+            else if (data.type === 'blink') blink(true);
+          } catch (e) {
+            console.warn('Invalid socket message:', event.data);
+          }
+        };
 
-  els.toggle.addEventListener('click', ()=>{
-    if(timer){ stopTicker(); els.toggle.textContent='Resume'; }
-    else { startTicker(); els.toggle.textContent='Pause'; }
-  });
-  els.speed.addEventListener('change', ()=>{ startTicker(); });
+        tick();
+        blinkLoop();
+        scheduleNextHeart();
+      }
 
-  async function init(){
-    await showQuote();
-    els.meta.textContent = 'Fetching names…';
-    const gazaChildren = await fetchGazaChildren();
+      function scheduleTargetRefresh() {
+        const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
+        const next13 = new Date(now); next13.setHours(13, 1, 0, 0);
+        if (next01 <= now) next01.setDate(next01.getDate() + 1);
+        if (next13 <= now) next13.setDate(next13.getDate() + 1);
+        const nextTarget = next01 < next13 ? next01 : next13;
+        setTimeout(() => location.reload(), nextTarget - now);
+      }
 
-    feed = shuffle(gazaChildren);
-
-    els.counts.classList.remove('hidden');
-    els.counts.textContent = `Loaded ${feed.length.toLocaleString()} children (Gaza) from the last 2 years`;
-
-    startTicker();
-  }
-
-  init();
-
-  setTimeout(() => {
-    window.location.reload();
-  }, 3600000);
-
-})();
-</script>
+      scheduleTargetRefresh();
+      setInterval(() => location.reload(), 3600 * 1000);
+    })();
+  </script>
 </body>
 </html>
