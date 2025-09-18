@@ -1,18 +1,27 @@
-// server.js
-// Simple time/seed authority + relay for optional events.
+// server.js — tiny time/seed authority + relay
+// Run: npm init -y && npm i ws && node server.js
+const http = require('http');
 const crypto = require('crypto');
 const WebSocket = require('ws');
 
 const PORT = process.env.PORT || 8080;
-const wss = new WebSocket.Server({ port: PORT });
+const STEP = 8000;                 // must match client
+const POSITIONS_LEN = 5;           // must match client
+const CYCLE = POSITIONS_LEN * STEP;
 
-function nowMs() { return Date.now(); }
-
-// One seed for everyone (refreshes on server restart). Make it reproducible enough.
+// One shared seed for all clients (resets on server restart)
 const seed = crypto.randomBytes(4).readUInt32LE(0);
 
-// Broadcast helper
-function bcast(payload, except = null) {
+// Basic HTTP server (optional, so ws can hang off it)
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {'Content-Type':'text/plain'});
+  res.end('Synced Eye WS server is running.\n');
+});
+
+const wss = new WebSocket.Server({ server, path: '/ws' });
+
+function nowMs() { return Date.now(); }
+function broadcast(payload, except = null) {
   const data = JSON.stringify(payload);
   for (const client of wss.clients) {
     if (client !== except && client.readyState === WebSocket.OPEN) client.send(data);
@@ -20,42 +29,42 @@ function bcast(payload, except = null) {
 }
 
 wss.on('connection', (ws) => {
-  // Greet with a SYNC payload containing server time + seed + a future epoch start aligned to STEP.
-  const STEP = 8000; // must match client
-  const cycle = 5 * STEP; // positions.length * STEP (must match client)
   const serverNow = nowMs();
-  // Choose next epoch start on a cycle boundary (a little in the future so all clients catch it)
+  // Choose an epochStart aligned to STEP slightly in the future
   const startIn = 1200; // ms
   const epochStart = Math.ceil((serverNow + startIn) / STEP) * STEP;
 
+  // Initial sync
   ws.send(JSON.stringify({
     type: 'sync',
     serverTime: serverNow,
     epochStart,
     seed,
+    step: STEP,
+    positionsLen: POSITIONS_LEN,
   }));
 
-  ws.on('message', (raw) => {
+  ws.on('message', raw => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
 
-    // Optional: round-trip time sync pings
     if (msg.type === 'ping') {
       ws.send(JSON.stringify({ type: 'pong', serverTime: nowMs(), echo: msg.echo }));
       return;
     }
 
-    // Relay user-driven events (e.g., a manual blink) to everyone
+    // Optional: relay manual events (rarely needed, but nice to have)
     if (msg.type === 'blink' || msg.type === 'move') {
-      bcast(msg, ws);
+      broadcast(msg, ws);
     }
   });
 });
 
-// Periodic heartbeat so clients can correct drift over time
+// Smooth clock maintenance for long sessions
 setInterval(() => {
-  const serverTime = nowMs();
-  bcast({ type: 'heartbeat', serverTime });
+  broadcast({ type: 'heartbeat', serverTime: nowMs() });
 }, 3000);
 
-console.log(`Synced Eye WebSocket server running on ws://0.0.0.0:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`WS server on ws://0.0.0.0:${PORT}/ws (use wss behind TLS/proxy)`);
+});
