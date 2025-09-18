@@ -4,35 +4,38 @@
   <meta charset="UTF-8" />
   <meta http-equiv="refresh" content="3600" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Synced Eye</title>
+  <title>Synced Eye (No Server)</title>
   <style>
-    html,body{margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden}
-    .hidden{display:none}
-    video.loopVideo, img.loopVideo{
-      position:fixed;top:50%;left:50%;width:100vw;height:100vh;transform:translate(-50%,-50%) rotate(180deg);
-      object-fit:cover;z-index:0;background-color:black
+    html, body { margin:0; padding:0; width:100%; height:100%; background:#000; overflow:hidden; }
+    .hidden { display:none; }
+    video.loopVideo, img.loopVideo {
+      position:fixed; top:50%; left:50%; width:100vw; height:100vh;
+      transform:translate(-50%,-50%) rotate(180deg);
+      object-fit:cover; z-index:0; background:black;
     }
-    #eye{position:fixed;width:600px;height:600px;background:#fff;border-radius:50%;overflow:hidden;
-      transition:left 3s ease-in-out, top 3s ease-in-out;z-index:1}
-    #pupil{position:absolute;width:300px;height:300px;background:#000;border-radius:50%;
-      top:50%;left:50%;transform:translate(-50%,-50%);transition:left 3s ease-in-out, top 3s ease-in-out}
-    #pupil::before{content:'';position:absolute;width:80px;height:80px;background:#fff;border-radius:50%;top:40px;left:40px}
-    .eyelid{position:absolute;width:100%;height:50%;background:#000;left:0;z-index:3;pointer-events:none}
-    #upperEyelid{top:-50%} #lowerEyelid{bottom:-50%}
-    @keyframes blinkUpper{0%,100%{top:-50%}50%{top:0}} @keyframes blinkLower{0%,100%{bottom:-50%}50%{bottom:0}}
-    .blinkUp{animation:blinkUpper 0.5s ease-in-out} .blinkDown{animation:blinkLower 0.5s ease-in-out}
-    .sleepLid{position:fixed;width:600px;height:100px;background:#555;border-radius:50px;left:50%;top:50%;
-      transform:translate(-50%,-50%);z-index:4;animation:floatSleep 4s ease-in-out infinite}
-    @keyframes floatSleep{0%,100%{transform:translate(-50%,-35%)}50%{transform:translate(-50%,-65%)}}
-    .bubble{position:fixed;border-radius:50%;background:rgba(255,255,255,.15);animation:bubbleUp 5s linear infinite;display:none;z-index:5}
-    .showBubbles .bubble{display:block}
-    #bubble1{width:40px;height:40px;left:85%;top:10%;animation-delay:0s}
-    #bubble2{width:30px;height:30px;left:88%;top:16%;animation-delay:1.5s}
-    #bubble3{width:20px;height:20px;left:91%;top:22%;animation-delay:3s}
-    @keyframes bubbleUp{0%{transform:translateY(0);opacity:.2}50%{transform:translateY(-20px);opacity:.4}100%{transform:translateY(-60px);opacity:0}}
-    #heart{position:fixed;font-size:300px;z-index:10;display:none;pointer-events:none;animation:pulse 1s infinite ease-in-out;
-      text-align:center;line-height:600px;width:600px;height:600px;transform:rotate(180deg)}
-    @keyframes pulse{0%,100%{transform:scale(1) rotate(180deg)}50%{transform:scale(1.2) rotate(180deg)}}
+    #eye { position:fixed; width:600px; height:600px; background:#fff; border-radius:50%;
+      overflow:hidden; transition:left 3s ease-in-out, top 3s ease-in-out; z-index:1; }
+    #pupil { position:absolute; width:300px; height:300px; background:#000; border-radius:50%;
+      top:50%; left:50%; transform:translate(-50%,-50%); transition:left 3s ease-in-out, top 3s ease-in-out; }
+    #pupil::before { content:''; position:absolute; width:80px; height:80px; background:#fff; border-radius:50%; top:40px; left:40px; }
+    .eyelid { position:absolute; width:100%; height:50%; background:#000; left:0; z-index:3; pointer-events:none; }
+    #upperEyelid { top:-50%; } #lowerEyelid { bottom:-50%; }
+    @keyframes blinkUpper { 0%,100%{top:-50%} 50%{top:0} }
+    @keyframes blinkLower { 0%,100%{bottom:-50%} 50%{bottom:0} }
+    .blinkUp { animation: blinkUpper 0.5s ease-in-out; }
+    .blinkDown { animation: blinkLower 0.5s ease-in-out; }
+    .sleepLid { position:fixed; width:600px; height:100px; background:#555; border-radius:50px;
+      left:50%; top:50%; transform:translate(-50%,-50%); z-index:4; animation: floatSleep 4s ease-in-out infinite; }
+    @keyframes floatSleep { 0%,100%{ transform:translate(-50%,-35%) } 50%{ transform:translate(-50%,-65%) } }
+    .bubble { position:fixed; border-radius:50%; background:rgba(255,255,255,.15); animation:bubbleUp 5s linear infinite; display:none; z-index:5; }
+    .showBubbles .bubble { display:block; }
+    #bubble1{ width:40px; height:40px; left:85%; top:10%; animation-delay:0s; }
+    #bubble2{ width:30px; height:30px; left:88%; top:16%; animation-delay:1.5s; }
+    #bubble3{ width:20px; height:20px; left:91%; top:22%; animation-delay:3s; }
+    @keyframes bubbleUp { 0%{ transform:translateY(0); opacity:.2 } 50%{ transform:translateY(-20px); opacity:.4 } 100%{ transform:translateY(-60px); opacity:0 } }
+    #heart { position:fixed; font-size:300px; z-index:10; display:none; pointer-events:none; animation:pulse 1s infinite ease-in-out;
+      text-align:center; line-height:600px; width:600px; height:600px; transform:rotate(180deg); }
+    @keyframes pulse { 0%,100%{ transform:scale(1) rotate(180deg) } 50%{ transform:scale(1.2) rotate(180deg) } }
   </style>
 </head>
 <body>
@@ -53,34 +56,38 @@
 
   <script>
     (function () {
-      // ------ DOM refs ------
+      // ------- DOM -------
       const eye = document.getElementById('eye');
       const pupil = document.getElementById('pupil');
       const upperLid = document.getElementById('upperEyelid');
       const lowerLid = document.getElementById('lowerEyelid');
       const sleepLid = document.getElementById('sleepEyelid');
       const heart = document.getElementById('heart');
-      const loopVideo = document.getElementById('loopVideo');
-      const videoSource = document.getElementById('videoSource');
 
-      // ------ Day/time gating (local) ------
+      // ------- config from URL -------
+      const url = new URL(location.href);
+      const seedParam = url.searchParams.get('seed') || 'synced-eye-v1';
+      const nudgeMs = parseInt(url.searchParams.get('nudge') || '0', 10) || 0; // manual offset tweak
+
+      // ------- time-of-day modes (same as yours) -------
       const nowLocal = new Date();
       const day = nowLocal.getDay();
       const hour = nowLocal.getHours();
-      const isGifDay = day === 0 || day === 1;
-      const isSleeping = hour >= 1 && hour < 13;
+      const isGifDay = day === 0 || day === 1;       // Sun/Mon
+      const isSleeping = hour >= 1 && hour < 13;     // 01:00–12:59
 
-      // ------ Deterministic PRNG (Mulberry32) ------
-      function mulberry32(a) {
-        return function() {
-          let t = a += 0x6D2B79F5;
-          t = Math.imul(t ^ (t >>> 15), t | 1);
-          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-        };
+      // ------- helpers: PRNG + hash -------
+      function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+      function hash32(str){
+        let h = 2166136261>>>0;
+        for (let i=0; i<str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return h>>>0;
       }
 
-      // ------ Shared positions & timing ------
+      // ------- deterministic setup -------
+      const SEED = hash32(seedParam);
+      let rngBase = mulberry32(SEED);
+
       const positions = [
         { x: 0.05, y: 0.05 },
         { x: 0.75, y: 0.20 },
@@ -91,173 +98,80 @@
       const STEP = 8000;
       const CYCLE = positions.length * STEP;
 
-      // ------ Clock sync via WS ------
-      let ws, wsUrl, prng = mulberry32(1), seed = 1;
-      let offset = 0;           // serverTime - clientNow
-      let epochStart = null;    // ms epoch boundary for position schedule
-      let reconnectDelay = 500; // grows up to a cap
+      // Epoch aligned to the NEXT STEP boundary so everyone shares the same slots.
+      let epochStart;
+      function nowMs() { return Date.now() + nudgeMs; } // include optional manual nudge
+      function nextBoundary(t) { return Math.ceil(t / STEP) * STEP; }
 
-      function clientNow() { return Date.now(); }
-      function syncedNow() { return clientNow() + offset; }
-
-      function computeOffsetPing() {
-        const t0 = clientNow();
-        ws.send(JSON.stringify({ type: 'ping', echo: t0 }));
+      function initEpoch() {
+        const t = nowMs() + 1200; // start ~1.2s in the future to avoid race conditions
+        epochStart = nextBoundary(t);
       }
+      initEpoch();
 
-      function connectWS() {
-        const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
-        // If server runs on same host: change :8080 if different.
-        wsUrl = proto + (location.hostname || 'localhost') + ':8080';
-        ws = new WebSocket(wsUrl);
+      // Occasionally slide the epoch forward to keep long-run drift tiny (never jump backward).
+      setInterval(() => {
+        const next = nextBoundary(nowMs() + 1200);
+        if (next > epochStart) epochStart = next;
+      }, 15000);
 
-        ws.onopen = () => {
-          reconnectDelay = 500;
-          // Initial ping for better offset after 'sync'
-          computeOffsetPing();
-        };
-
-        ws.onmessage = (event) => {
-          let data;
-          try { data = JSON.parse(event.data); } catch { return; }
-
-          if (data.type === 'sync') {
-            // 1st sync from server: seed + epochStart + serverTime
-            seed = data.seed >>> 0;
-            prng = mulberry32(seed);
-            epochStart = data.epochStart;
-            // First rough offset
-            offset = (data.serverTime - clientNow());
-            // Start behaviors once we know epoch
-            if (!(isGifDay || isSleeping)) startEyeBehavior(); else applyMode();
-            return;
-          }
-
-          if (data.type === 'pong' && typeof data.echo === 'number') {
-            const t1 = clientNow();
-            const rtt = t1 - data.echo;
-            // Better offset estimate: serverTime - (clientSend + rtt/2)
-            offset = (data.serverTime - (data.echo + rtt / 2));
-            return;
-          }
-
-          if (data.type === 'heartbeat') {
-            // slowly correct drift toward heartbeat time (avoid jumps)
-            const targetOffset = data.serverTime - clientNow();
-            offset = offset * 0.9 + targetOffset * 0.1;
-            return;
-          }
-
-          // Optional shared events (manual blink/move) — kept for parity
-          if (data.type === 'blink') blink(true);
-          if (data.type === 'move' && data.position) moveTo(data.position, true);
-        };
-
-        ws.onclose = scheduleReconnect;
-        ws.onerror = scheduleReconnect;
-      }
-
-      function scheduleReconnect() {
-        try { ws && ws.close(); } catch {}
-        setTimeout(connectWS, reconnectDelay);
-        reconnectDelay = Math.min(reconnectDelay * 1.6, 5000);
-      }
-
-      // Broadcast helper (safe if ws not ready)
-      function broadcast(evt) {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify(evt));
-        }
-      }
-
-      // ------ Eye behavior (driven by synced clock) ------
-      let moveTimer = null, blinkTimer = null, heartTimer = null;
-
-      function applyMode() {
-        if (isGifDay) {
-          const gif = document.createElement('img');
-          gif.src = "omer1.gif";
-          gif.classList.add('loopVideo');
-          document.body.appendChild(gif);
-          eye.classList.add('hidden');
-        } else if (isSleeping) {
-          eye.classList.add('hidden');
-          sleepLid.classList.remove('hidden');
-          sleepLid.classList.add('sleepLid');
-          document.body.classList.add('showBubbles');
-        }
-      }
-
-      function startEyeBehavior() {
-        eye.classList.remove('hidden');
-        scheduleNextMoveTick(true);
-        scheduleNextBlink();
-        scheduleNextHeart();
-      }
-
-      function positionIndexAt(timeMs) {
-        // Use shared epochStart so everyone aligns to same slot
-        const t = (timeMs - epochStart + CYCLE * 1000) % CYCLE; // big offset to avoid negatives
+      function positionIndexAt(timeMs){
+        const t = (timeMs - epochStart + CYCLE * 1000) % CYCLE;
         return Math.floor(t / STEP) % positions.length;
       }
 
-      function moveTo(p, fromSocket = false) {
+      // ------- movement -------
+      let moveTimer = null, blinkTimer = null, heartTimer = null;
+
+      function moveTo(p){
         const eyeW = eye.offsetWidth, eyeH = eye.offsetHeight;
         const maxX = window.innerWidth - eyeW, maxY = window.innerHeight - eyeH;
         const tx = Math.max(0, Math.min(p.x * window.innerWidth, maxX));
         const ty = Math.max(0, Math.min(p.y * window.innerHeight, maxY));
         eye.style.left = tx + 'px';
-        eye.style.top = ty + 'px';
+        eye.style.top  = ty + 'px';
         pupil.style.left = p.x > 0.5 ? '80%' : '20%';
         pupil.style.top  = p.y > 0.5 ? '80%' : '20%';
         setTimeout(() => { pupil.style.left = '50%'; pupil.style.top = '50%'; }, 3000);
-        if (!fromSocket) broadcast({ type: 'move', position: p });
       }
 
-      function scheduleNextMoveTick(initial=false) {
+      function scheduleNextMoveTick(){
         if (moveTimer) clearTimeout(moveTimer);
-        const nowS = syncedNow();
-        const idx = positionIndexAt(nowS);
-        moveTo(positions[idx], true); // fromSocket=true to avoid rebroadcast storms
-
-        // Schedule precisely at next STEP boundary to minimize drift
-        const nextBoundary = epochStart + (Math.floor((nowS - epochStart) / STEP) + 1) * STEP;
-        const delay = Math.max(0, nextBoundary - nowS);
-        moveTimer = setTimeout(scheduleNextMoveTick, delay);
+        const n = nowMs();
+        moveTo(positions[positionIndexAt(n)]);
+        const next = epochStart + (Math.floor((n - epochStart)/STEP) + 1) * STEP;
+        moveTimer = setTimeout(scheduleNextMoveTick, Math.max(0, next - n));
       }
 
-      // ---- Deterministic blink schedule (seeded) ----
-      function nextDeterministicDelay(baseMin, baseMax, channelSalt) {
-        // channelSalt makes blink vs heart run on different PRNG substreams
-        const salt = (seed ^ channelSalt) >>> 0;
-        const localPrng = mulberry32(salt + Math.floor((syncedNow() - epochStart) / (baseMin + 1)));
-        const r = localPrng();
-        return baseMin + r * (baseMax - baseMin);
+      // ------- deterministic intervals (no server) -------
+      // Re-derive a PRNG per window so all clients pick the same next delay.
+      function deterministicDelay(minMs, maxMs, channelSalt){
+        const WINDOW = 12000; // big enough to avoid constant rescheduling, small enough to track clock
+        const windowIndex = Math.floor((nowMs() - epochStart) / WINDOW);
+        const localSeed = (SEED ^ hash32(channelSalt + ':' + windowIndex)) >>> 0;
+        const rnd = mulberry32(localSeed)();
+        return minMs + rnd * (maxMs - minMs);
       }
 
-      function blink(fromSocket = false) {
+      function blink(){
         upperLid.classList.add('blinkUp');
         lowerLid.classList.add('blinkDown');
         setTimeout(() => {
           upperLid.classList.remove('blinkUp');
           lowerLid.classList.remove('blinkDown');
         }, 500);
-        if (!fromSocket) broadcast({ type: 'blink' });
       }
-
-      function scheduleNextBlink() {
+      function scheduleNextBlink(){
         if (blinkTimer) clearTimeout(blinkTimer);
-        blink(); // blink now, then schedule the next deterministically
-        const delay = nextDeterministicDelay(5000, 10000, 0xB1_1NK);
-        blinkTimer = setTimeout(scheduleNextBlink, delay);
+        blink();
+        blinkTimer = setTimeout(scheduleNextBlink, deterministicDelay(5000, 10000, 'blink'));
       }
 
-      // ---- Deterministic heart schedule (seeded) ----
-      function showHeartTemporarily() {
+      function showHeartTemporarily(){
         const heartDuration = 2000;
-        const eyeBox = eye.getBoundingClientRect();
-        heart.style.left = eyeBox.left + 'px';
-        heart.style.top = eyeBox.top + 'px';
+        const box = eye.getBoundingClientRect();
+        heart.style.left = box.left + 'px';
+        heart.style.top  = box.top  + 'px';
         heart.style.display = 'block';
         eye.style.visibility = 'hidden';
         setTimeout(() => {
@@ -266,21 +180,35 @@
           scheduleNextHeart();
         }, heartDuration);
       }
-
-      function scheduleNextHeart() {
+      function scheduleNextHeart(){
         if (heartTimer) clearTimeout(heartTimer);
-        const delay = nextDeterministicDelay(10000, 30000, 0xHE_ART);
-        heartTimer = setTimeout(showHeartTemporarily, delay);
+        heartTimer = setTimeout(showHeartTemporarily, deterministicDelay(10000, 30000, 'heart'));
       }
 
-      // ------ Mode + start ------
-      if (isGifDay || isSleeping) {
-        applyMode();
+      // ------- modes -------
+      function applyMode(){
+        if (isGifDay) {
+          const gif = document.createElement('img');
+          gif.src = "omer1.gif";            // put this file in your site if you use it
+          gif.classList.add('loopVideo');
+          document.body.appendChild(gif);
+          eye.classList.add('hidden');
+        } else if (isSleeping) {
+          eye.classList.add('hidden');
+          sleepLid.classList.remove('hidden');
+          sleepLid.classList.add('sleepLid');
+          document.body.classList.add('showBubbles');
+        } else {
+          eye.classList.remove('hidden');
+          scheduleNextMoveTick();
+          scheduleNextBlink();
+          scheduleNextHeart();
+        }
       }
 
-      connectWS();
+      applyMode();
 
-      // Keep page flip timing aligned with the sleep/wake boundaries
+      // keep page flips aligned with sleep/wake
       function scheduleTargetRefresh() {
         const now = new Date();
         const next01 = new Date(now); next01.setHours(1, 1, 0, 0);
@@ -293,14 +221,11 @@
       scheduleTargetRefresh();
       setInterval(() => location.reload(), 3600 * 1000);
 
-      // Recompute layout (keeps eye in bounds on resize)
+      // re-place eye on resize using the current slot
       window.addEventListener('resize', () => {
-        const nowS = syncedNow();
-        if (epochStart != null) moveTo(positions[positionIndexAt(nowS)], true);
+        if (eye.classList.contains('hidden')) return;
+        moveTo(positions[positionIndexAt(nowMs())]);
       });
-
-      // Optional: Manual blink on click (broadcasts)
-      window.addEventListener('click', () => blink(false));
     })();
   </script>
 </body>
